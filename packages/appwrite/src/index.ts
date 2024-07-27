@@ -4,8 +4,8 @@ import zod from "zod";
 // Function to create a session client using JWT from headers
 export async function createSessionClient(jwt: string) {
     const client = new Client()
-        .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-        .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!);
+        .setEndpoint('https://appwrite.biso.no/v1')
+        .setProject('biso');
   
     client.setJWT(jwt);
   
@@ -34,9 +34,9 @@ export async function createSessionClient(jwt: string) {
 // Function to create an admin client using API key
 export async function createAdminClient() {
     const client = new Client()
-        .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!)
-        .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT!)
-        .setKey(process.env.NEXT_APPWRITE_KEY!);
+        .setEndpoint('https://appwrite.biso.no/v1')
+        .setProject('biso')
+        .setKey(process.env.API_KEY!);
   
     return {
         get account() {
