@@ -23,10 +23,21 @@ export default async ({ req, res, log, error }: Context) => {
         }
 
         log('Creating team...');
-        const teamId = await createTeam(req.headers['x-appwrite-user-jwt']!, teamName, users, emails);
+        const teamId = await createTeam({
+            jwt: req.headers['x-appwrite-user-jwt']!,
+            teamName,
+            users,
+            emails,
+            log
+        });
 
-        log('Returning team ID...');
-        return res.json({ teamId });
+        if (teamId) {
+            log('Returning team ID...');
+            return res.json({ teamId });
+        } else {
+            log('No team ID returned.');
+            return res.json({ error: 'No team ID returned' });
+        }
     } catch (err: any) {
         log('An error occurred: ' + err);
         return res.json({ error: (err as Error).message });
