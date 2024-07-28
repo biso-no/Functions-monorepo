@@ -53,6 +53,7 @@ interface Acf {
 export default async ({ req, res, log, error }: Context) => {
 
     const { id, date, link, slug, status, content, acf, title } = req.body.data as Post;
+    log('Parsed post data: ' + JSON.stringify(req.body.data));
 
     const client = await createAdminClient();
 
