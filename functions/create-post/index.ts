@@ -55,6 +55,9 @@ export default async ({ req, res, log, error }: Context) => {
     const { id, date, link, slug, status, content, acf, title } = req.body.data as Post;
     log('Parsed post data: ' + JSON.stringify(req.body.data));
 
+    //Path to image url: "yoast_head_json.schema.@graph[2].url"
+    const imageUrl = req.body.data.yoast_head_json.schema["@graph"][2].url;
+
     const client = await createAdminClient();
 
     let department;
@@ -90,7 +93,8 @@ export default async ({ req, res, log, error }: Context) => {
             campus: acf.campus.value,
             campus_id: acf.campus.value,
             department: department,
-            department_id: department
+            department_id: department,
+            image: imageUrl
         });
 
         return res.json({ post });
