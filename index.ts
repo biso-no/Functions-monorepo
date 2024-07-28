@@ -1,1 +1,3 @@
-console.log("Hello via Bun!");
+export default function ({ req, res, log, error }: any) {
+    log('Hello!');
+}
