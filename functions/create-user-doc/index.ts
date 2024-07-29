@@ -15,7 +15,7 @@ interface UserDoc {
 export default async ({ req, res, log, error }: Context) => {
 
     const { $id, email } = req.body as UserDoc;
-    log('Parsed post data: ' + JSON.stringify(req.body.data));
+    log('Parsed post data: ' + JSON.stringify(req.body));
 
     //Path to image url: "yoast_head_json.schema.@graph[2].url"
 
