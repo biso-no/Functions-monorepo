@@ -8,7 +8,7 @@ type Context = {
 };
 
 interface UserDoc {
-    $id: string;
+    userId: string;
     email: string;
 }
 
@@ -16,7 +16,7 @@ export default async ({ req, res, log, error }: Context) => {
     try {
         log('Starting function execution');
 
-        const { $id, email } = req.body as UserDoc;
+        const { userId, email } = req.body as UserDoc;
         log('Parsed post data: ' + JSON.stringify(req.body));
 
         //Path to image url: "yoast_head_json.schema.@graph[2].url"
@@ -24,9 +24,9 @@ export default async ({ req, res, log, error }: Context) => {
         const { databases } = await createSessionClient(req.headers['x-appwrite-user-jwt']!);
         log('Session client created');
 
-        if ($id && email) {
+        if (userId && email) {
             log('Checking for existing document');
-            const existingDoc = await databases.getDocument('app', 'user', $id, [
+            const existingDoc = await databases.getDocument('app', 'user', userId, [
                 Query.equal('email', email),
                 Query.select(['email', '$id'])
             ]);
@@ -38,7 +38,7 @@ export default async ({ req, res, log, error }: Context) => {
             }
 
             log('Creating new user document');
-            const userDoc = await databases.createDocument('app', 'user', $id, {
+            const userDoc = await databases.createDocument('app', 'user', userId, {
                 email
             });
             log('Created user document: ' + JSON.stringify(userDoc));
@@ -48,12 +48,12 @@ export default async ({ req, res, log, error }: Context) => {
             log('Retrieved user document: ' + JSON.stringify(user));
 
             return res.json({ status: 'ok', exists: false });
-        } else if (!email && !$id) {
+        } else if (!email && !userId) {
             log('No email or ID provided');
             return res.json({ error: 'No email or ID provided' });
         }
-    } catch (err) {
-        error('An error occurred: ' + err.message);
+    } catch (err: any) {
+        error('An error occurred: ' + (err as Error).message);
         return res.json({ error: 'An internal error occurred' });
     }
 }
