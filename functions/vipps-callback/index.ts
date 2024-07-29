@@ -10,9 +10,10 @@ type Context = {
 
 export default async ({ req, res, log, error }: Context) => {
 log('On Vipps Payment POST request');
-    const { reference } = JSON.parse(req.body);
-    log('Request Body: ' + req.body);
-    log('Initiating Admin Client...');
+    
+const body = req.body;
+const bodyToJson = JSON.stringify(body);
+const { reference } = JSON.parse(req.body);
     const { databases } = await createAdminClient();
     try {
     const checkout = await getCheckout(reference);
