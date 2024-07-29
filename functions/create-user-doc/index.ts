@@ -32,10 +32,7 @@ export default async ({ req, res, log, error }: Context) => {
         const { databases } = await createSessionClient(req.headers['x-appwrite-user-jwt']!);
         log('Session client created');
 
-        const existingDoc = await databases.getDocument('app', 'user', userId, [
-            Query.equal('email', email),
-            Query.select(['email', '$id'])
-        ]);
+        const existingDoc = await databases.getDocument('app', 'user', userId);
         log('Existing document check complete: ' + JSON.stringify(existingDoc));
         
         if (existingDoc.$id) {
