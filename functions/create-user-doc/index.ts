@@ -8,7 +8,6 @@ type Context = {
 };
 
 interface UserDoc {
-    userId: string;
     email: string;
 }
 
@@ -16,7 +15,7 @@ export default async ({ req, res, log, error }: Context) => {
 
     if (req.method !== 'POST') {
         log('Invalid request method');
-        return res.status(405).json({ error: 'Method Not Allowed' });
+        return res.json({ error: 'Method Not Allowed' });
     }
 
     log('On User Created POST request');
@@ -26,33 +25,35 @@ export default async ({ req, res, log, error }: Context) => {
         body = JSON.parse(req.body);
     } catch (e) {
         log('Invalid JSON in request body');
-        return res.status(400).json({ error: 'Invalid JSON' });
+        return res.json({ error: 'Invalid JSON' });
     }
 
-    const { userId, email } = body;
+    const { email } = body;
 
-    if (!userId || !email) {
+    if (!email) {
         log('No userId or email provided');
-        return res.status(400).json({ error: 'No userId or email provided' });
+        return res.json({ error: 'No userId or email provided' });
     }
 
-    const { databases } = await createSessionClient(req.headers['x-appwrite-user-jwt']);
+    const { databases, account } = await createSessionClient(req.headers['x-appwrite-user-jwt'] as string);
 
-    try {
-        const existingDoc = await databases.getDocument('app', 'user', userId);
+    const user = await account.get();
+
+    const existingDoc = await databases.getDocument('app', 'user', user.$id);
+
+    if (existingDoc) {
         log('Existing document check complete: ' + JSON.stringify(existingDoc));
         return res.json({ status: 'ok', exists: true });
-    } catch (err: any) {
-        log('Document does not exist, creating new user document');
-        try {
-            const userDoc = await databases.createDocument('app', 'user', userId, {
-                email
-            });
-            log('Created user document: ' + JSON.stringify(userDoc));
-            return res.json({ status: 'ok', exists: false });
-        } catch (e) {
-            log('Failed to create user document');
-            return res.status(500).json({ error: 'Failed to create user document' });
-        }
+    }
+
+    try {
+        const userDoc = await databases.createDocument('app', 'user', user.$id, {
+            email
+        });
+        log('Created user document: ' + JSON.stringify(userDoc));
+        return res.json({ status: 'ok', exists: false });
+    } catch (e) {
+        log('Failed to create user document');
+        return res.json({ error: 'Failed to create user document' });
     }
 };
