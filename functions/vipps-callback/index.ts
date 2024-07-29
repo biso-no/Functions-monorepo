@@ -12,6 +12,7 @@ export default async ({ req, res, log, error }: Context) => {
 log('On Vipps Payment POST request');
     
 const body = req.body;
+log('Body: ' + JSON.stringify(body));
 const bodyToJson = JSON.stringify(body);
 const { reference } = JSON.parse(req.body);
     const { databases } = await createAdminClient();
