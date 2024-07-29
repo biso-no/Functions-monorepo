@@ -45,7 +45,7 @@ export default async ({ req, res, log, error }: Context) => {
 
             log('Creating checkout document...');
 
-            const doc = await databases.createDocument('app', 'checkout', reference, {
+            const doc = await databases.createDocument('app', 'payments', reference, {
                 reference,
                 amount,
                 description,
