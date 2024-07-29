@@ -72,6 +72,7 @@ export async function createPayment({
     description,
     returnUrl,
     membershipId,
+    membershipName,
     phoneNumber,
     paymentMethod,
 }: {
@@ -81,22 +82,46 @@ export async function createPayment({
     description: string,
     returnUrl: string,
     membershipId: string,
+    membershipName: string,
     phoneNumber: string,
     paymentMethod: EPaymentMethodType,
 }) {
+
+  const amountWithCents = amount * 100;
   
     const payment = await client.payment.create(token, {
       amount: {
         currency: "NOK",
-        value: amount, // This value equals 10 NOK
+        value: amountWithCents, // This value equals 10 NOK
       },
       paymentMethod: { type: paymentMethod },
       customer: { phoneNumber: phoneNumber },
+      receipt: {
+        orderLines: [
+          {
+            name: membershipName,
+            id: membershipId,
+            totalAmount: amountWithCents,
+            totalAmountExcludingTax: amountWithCents,
+            totalTaxAmount: 0,
+            taxPercentage: 0,
+          }
+        ],
+        bottomLine: {
+          currency: "NOK",
+          posId: membershipId,
+          receiptNumber: ID.unique(),
+      }
+    },
+    reference: reference,
+    userFlow: "WEB_REDIRECT",
       returnUrl: returnUrl,
-      userFlow: "WEB_REDIRECT",
-      paymentDescription: description,
-      reference: reference,
+      paymentDescription: membershipId + " - " + description,
     });
+
+    if (payment.ok) {
+      return payment
+    }
 
     return payment;
   }

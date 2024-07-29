@@ -1,3 +1,4 @@
+import { EPaymentMethodType } from "@vippsmobilepay/sdk";
 import { createPayment, getAccessToken } from "../../packages/vipps/src/index.js";
 import { createSessionClient, ID } from "@biso/appwrite";
 
@@ -7,6 +8,15 @@ type Context = {
     log: (msg: any) => void;
     error: (msg: any) => void;
 };
+interface Body {
+  amount: number;
+  description: string;
+  returnUrl: string;
+  membershipId: string;
+  phoneNumber: string;
+  paymentMethod: EPaymentMethodType;
+  membershipName: string;
+}
 
 export default async ({ req, res, log, error }: Context) => {
     log('On Vipps Payment POST request');
@@ -23,7 +33,7 @@ export default async ({ req, res, log, error }: Context) => {
         return res.json({ error: 'Invalid JSON' });
     }
 
-    const { amount, description, returnUrl, membershipId, phoneNumber, paymentMethod } = body;
+    const { amount, description, returnUrl, membershipId, phoneNumber, paymentMethod, membershipName } = body;
     log('Parsed request body: ' + JSON.stringify(body));
 
     if (!amount || !description || !returnUrl) {
@@ -44,6 +54,7 @@ export default async ({ req, res, log, error }: Context) => {
             membershipId,
             phoneNumber,
             paymentMethod,
+            membershipName,
         });
 
         if (checkout.ok) {
