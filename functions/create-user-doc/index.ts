@@ -8,13 +8,13 @@ type Context = {
 };
 
 interface UserDoc {
-    id: number;
+    $id: string;
     email: string;
 }
 
 export default async ({ req, res, log, error }: Context) => {
 
-    const { id, email } = req.body.data as UserDoc;
+    const { $id, email } = req.body.data as UserDoc;
     log('Parsed post data: ' + JSON.stringify(req.body.data));
 
     //Path to image url: "yoast_head_json.schema.@graph[2].url"
@@ -22,8 +22,9 @@ export default async ({ req, res, log, error }: Context) => {
 
     const { databases } = await createAdminClient();
 
+    if ($id && email) {
     
-    const userDoc = await databases.createDocument('app', 'user', ID.unique(), {
+    const userDoc = await databases.createDocument('app', 'user', $id, {
         email
     });
     log('Created user document: ' + JSON.stringify(userDoc));
@@ -32,5 +33,7 @@ export default async ({ req, res, log, error }: Context) => {
     log('Retrieved user document: ' + JSON.stringify(user));
 
     return res.json({ user });
-
-};
+    } else if (!email && !$id) {
+        return res.json({ error: 'No email or ID provided' });
+    }
+}
