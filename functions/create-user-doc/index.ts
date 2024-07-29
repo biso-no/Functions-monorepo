@@ -1,4 +1,4 @@
-import { createAdminClient, ID } from "@biso/appwrite";
+import { createAdminClient, createSessionClient, ID, Query } from "@biso/appwrite";
 
 type Context = {
     req: any;
@@ -20,13 +20,16 @@ export default async ({ req, res, log, error }: Context) => {
     //Path to image url: "yoast_head_json.schema.@graph[2].url"
 
 
-    const { databases } = await createAdminClient();
+    const { databases } = await createSessionClient(req.headers['x-appwrite-user-jwt']!);
 
     if ($id && email) {
     
-        const existingDoc = await databases.getDocument('app', 'user', $id);
+        const existingDoc = await databases.getDocument('app', 'user', $id, [
+            Query.equal('email', email),
+            Query.select(['email', '$id'])
+        ]);
         if (existingDoc.$id) {
-            return res.json({ error: 'User already exists' });
+            return res.json({ status: 'ok', exists: true });
         }
 
     const userDoc = await databases.createDocument('app', 'user', $id, {
@@ -37,7 +40,7 @@ export default async ({ req, res, log, error }: Context) => {
     const user = await databases.getDocument('app', 'user', userDoc.$id);
     log('Retrieved user document: ' + JSON.stringify(user));
 
-    return res.json({ user });
+    return res.json({ status: 'ok', exists: false });
     } else if (!email && !$id) {
         return res.json({ error: 'No email or ID provided' });
     }
