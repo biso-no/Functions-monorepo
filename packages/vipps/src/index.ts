@@ -9,7 +9,7 @@ const clientSecret = process.env.VIPPS_CLIENT_SECRET!;
 const client = Client({
     merchantSerialNumber,
     subscriptionKey,
-    useTestMode: process.env.VIPPS_TEST_MODE ? true : false,
+    useTestMode: process.env.VIPPS_TEST_MODE === "true" ? true : false,
     retryRequests: false,
   });
 
