@@ -15,7 +15,7 @@ interface UserDoc {
 export default async ({ req, res, log, error }: Context) => {
     try {
         
-        const { userId, email } = req.body;
+        const { userId, email } = req.body
         log('UserID: ' + userId);
         log('Email: ' + email);
         log('Request body: ' + JSON.stringify(req.body));
