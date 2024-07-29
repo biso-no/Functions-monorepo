@@ -22,6 +22,7 @@ export default async ({ req, res, log, error }: Context) => {
     log('On Vipps Payment POST request');
     log('Fetching access token...');
     const token = await getAccessToken();
+    log('Request body: ' + JSON.stringify(req.body));
     log('Access token fetched: ' + JSON.stringify(token));
 
     // Ensure the body is parsed correctly
