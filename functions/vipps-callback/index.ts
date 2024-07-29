@@ -20,6 +20,14 @@ log('On Vipps Payment POST request');
     if (checkout.ok) {
         log('Checkout found: ' + JSON.stringify(checkout));
 
+        const paymentDoc = await databases.getDocument('app', 'payment', reference);
+
+        const membershipUpdated = await databases.updateDocument('app', 'user', paymentDoc.user.$id, {
+            student_id: {
+                isMember: true,
+            }
+        });
+
         const doc = await databases.updateDocument('app', 'checkout', reference, {
             payment_method: checkout.data.paymentMethod,
             status: checkout.data.sessionState,
