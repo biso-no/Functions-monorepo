@@ -20,13 +20,7 @@ export default async ({ req, res, log, error }: Context) => {
 
     log('On User Created POST request');
 
-    let body;
-    try {
-        body = JSON.parse(req.body);
-    } catch (e) {
-        log('Invalid JSON in request body');
-        return res.json({ error: 'Invalid JSON' });
-    }
+const body = JSON.parse(req.body);
 
     const { email } = body;
 
