@@ -13,6 +13,11 @@ interface UserDoc {
 }
 
 export default async ({ req, res, log, error }: Context) => {
+
+    if (req.method === 'GET') {
+        log('On User Created GET request');
+    }
+
     try {
         
         const { userId, email } = req.body
