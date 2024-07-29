@@ -1,4 +1,4 @@
-import { createCheckout } from "../../packages/vipps/src/index.js";
+import { createPayment, getAccessToken } from "../../packages/vipps/src/index.js";
 import { createSessionClient, ID } from "@biso/appwrite";
 
 type Context = {
@@ -10,6 +10,9 @@ type Context = {
 
 export default async ({ req, res, log, error }: Context) => {
     log('On Vipps Payment POST request');
+    log('Fetching access token...');
+    const token = await getAccessToken();
+    log('Access token fetched: ' + JSON.stringify(token));
 
     // Ensure the body is parsed correctly
     let body;
@@ -20,7 +23,7 @@ export default async ({ req, res, log, error }: Context) => {
         return res.json({ error: 'Invalid JSON' });
     }
 
-    const { amount, description, returnUrl, membershipId } = body;
+    const { amount, description, returnUrl, membershipId, phoneNumber, paymentMethod } = body;
     log('Parsed request body: ' + JSON.stringify(body));
 
     if (!amount || !description || !returnUrl) {
@@ -30,12 +33,17 @@ export default async ({ req, res, log, error }: Context) => {
 
     const reference = ID.unique();
 
+    if (token.ok) {
     try {
-        const checkout = await createCheckout({
+        const checkout = await createPayment({
             reference,
             amount,
             description,
             returnUrl,
+            token: token.data.access_token,
+            membershipId,
+            phoneNumber,
+            paymentMethod,
         });
 
         if (checkout.ok) {
@@ -70,4 +78,5 @@ export default async ({ req, res, log, error }: Context) => {
             return res.json({ error: 'Failed to initiate checkout', details: 'Unknown error occurred' });
         }
     }
+}
 }

@@ -1,4 +1,4 @@
-import { Client } from "@vippsmobilepay/sdk";
+import { Client, EPaymentMethod, EPaymentMethodType } from "@vippsmobilepay/sdk";
 import { ID } from "node-appwrite";
 
 const merchantSerialNumber = process.env.VIPPS_MERCHANT_SERIAL_NUMBER!;
@@ -18,7 +18,10 @@ const client = Client({
   });
 
 
-export const accessToken = await client.auth.getToken(clientId, clientSecret);
+export async function getAccessToken() {
+  const token = await client.auth.getToken(clientId, clientSecret);
+  return token;
+}
 
 export async function createCheckout({
     reference,
@@ -60,4 +63,54 @@ export async function getCheckout({
     const checkout = await client.checkout.info(clientId, clientSecret, reference);
 
       return checkout;
+}
+
+export async function createPayment({
+    token,
+    reference,
+    amount,
+    description,
+    returnUrl,
+    membershipId,
+    phoneNumber,
+    paymentMethod,
+}: {
+  token: string,
+    reference: string,
+    amount: number,
+    description: string,
+    returnUrl: string,
+    membershipId: string,
+    phoneNumber: string,
+    paymentMethod: EPaymentMethodType,
+}) {
+  
+    const payment = await client.payment.create(token, {
+      amount: {
+        currency: "NOK",
+        value: amount, // This value equals 10 NOK
+      },
+      paymentMethod: { type: paymentMethod },
+      customer: { phoneNumber: phoneNumber },
+      returnUrl: returnUrl,
+      userFlow: "WEB_REDIRECT",
+      paymentDescription: description,
+      reference: reference,
+    });
+
+    return payment;
+  }
+
+export async function getPayment({
+    reference,
+    token,
+}: {
+    reference: string,
+    token: string,
+}) {
+  
+    const payment = await client.payment.info(token, reference);
+
+    return payment; 
+
 }
