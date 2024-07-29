@@ -1,10 +1,10 @@
 import { Client } from "@vippsmobilepay/sdk";
 import { ID } from "node-appwrite";
 
-const merchantSerialNumber = process.env.MERCHANT_SERIAL_NUMBER!;
-const subscriptionKey = process.env.SUBSCRIPTION_KEY!;
-const clientId = process.env.CLIENT_ID!;
-const clientSecret = process.env.CLIENT_SECRET!;
+const merchantSerialNumber = process.env.VIPPS_MERCHANT_SERIAL_NUMBER!;
+const subscriptionKey = process.env.VIPPS_SUBSCRIPTION_KEY!;
+const clientId = process.env.VIPPS_CLIENT_ID!;
+const clientSecret = process.env.VIPPS_CLIENT_SECRET!;
 
 const client = Client({
     merchantSerialNumber,
