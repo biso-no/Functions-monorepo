@@ -15,9 +15,10 @@ interface UserDoc {
 export default async ({ req, res, log, error }: Context) => {
     try {
         
-        const { userId, email } = req.body as UserDoc;
+        const { userId, email } = req.body;
         log('UserID: ' + userId);
         log('Email: ' + email);
+        log('Request body: ' + JSON.stringify(req.body));
 
         if (!userId || !email) {
             log('No userId or email provided');
