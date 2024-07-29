@@ -24,6 +24,11 @@ export default async ({ req, res, log, error }: Context) => {
 
     if ($id && email) {
     
+        const existingDoc = await databases.getDocument('app', 'user', $id);
+        if (existingDoc.$id) {
+            return res.json({ error: 'User already exists' });
+        }
+
     const userDoc = await databases.createDocument('app', 'user', $id, {
         email
     });
