@@ -10,7 +10,7 @@ type Context = {
 
 export default async ({ req, res, log, error }: Context) => {
 log('On Vipps Payment POST request');
-    const { amount, description, returnUrl, membershipId } = req.body;
+    const { amount, description, returnUrl, membershipId } = JSON.parse(req.body);
 
     log('Parsed request body: ' + JSON.stringify(req.body));
     if (!amount || !description || !returnUrl ) {
