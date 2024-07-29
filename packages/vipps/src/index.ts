@@ -46,3 +46,14 @@ export async function createCheckout({
 
       return checkout;
     }
+
+export async function getCheckout({
+    reference,
+}: {
+    reference: string,
+}) {
+  
+    const checkout = await client.checkout.info(clientId, clientSecret, reference);
+
+      return checkout;
+}

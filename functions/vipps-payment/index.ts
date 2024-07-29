@@ -10,7 +10,7 @@ type Context = {
 
 export default async ({ req, res, log, error }: Context) => {
 log('On Vipps Payment POST request');
-    const { amount, description, returnUrl,  callbackAuthorizationToken } = req.body;
+    const { amount, description, returnUrl, membershipId } = req.body;
 
     log('Parsed request body: ' + JSON.stringify(req.body));
     if (!amount || !description || !returnUrl ) {
@@ -31,7 +31,7 @@ log('On Vipps Payment POST request');
     if (checkout.ok) {
 
         log('Checkout created: ' + JSON.stringify(checkout));
-        log('Initiating Admin Client...');
+        log('Initiating Session Client...');
         const { databases } = await createSessionClient(req.headers['x-appwrite-user-jwt'] as string);
 
         log('Creating checkout document...');
@@ -40,6 +40,9 @@ log('On Vipps Payment POST request');
             reference,
             amount,
             description,
+            membership: membershipId,
+            membership_id: membershipId,
+            status: 'pending',
         });
     
         log('Checkout document created: ' + JSON.stringify(doc));
