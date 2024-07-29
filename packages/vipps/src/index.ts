@@ -11,6 +11,10 @@ const client = Client({
     subscriptionKey,
     useTestMode: process.env.VIPPS_TEST_MODE === "true" ? true : false,
     retryRequests: false,
+    pluginName: 'appwrite-plugin-vipps',
+    pluginVersion: '1.0.0',
+    systemName: 'appwrite-plugin-vipps',
+    systemVersion: '1.0.0',
   });
 
 
