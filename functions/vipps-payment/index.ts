@@ -65,7 +65,7 @@ export default async ({ req, res, log, error }: Context) => {
                 description,
                 membership: membershipId,
                 membership_id: membershipId,
-                status: 'pending',
+                status: 'CREATED',
             });
 
             log('Checkout document created: ' + JSON.stringify(doc));
