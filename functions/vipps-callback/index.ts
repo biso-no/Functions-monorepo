@@ -93,8 +93,8 @@ export default async ({ req, res, log, error }: Context) => {
         user: {
             student_ids: {
                 isMember: true,
-                membershipId: [existingDoc.user.student_ids.membershipId],
-                memberships: [existingDoc.user.student_ids.membershipId],
+                membershipId: [existingDoc.membership_id],
+                memberships: [existingDoc.membership_id],
             }
         }
     });
