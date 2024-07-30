@@ -83,10 +83,19 @@ export default async ({ req, res, log, error }: Context) => {
 
     log('Payment found: ' + JSON.stringify(payment));
 
+    const existingDoc = await databases.getDocument('app', 'payments', payment.data.reference);
+
     const paymentDoc = await databases.updateDocument('app', 'payments', payment.data.reference, {
         status: payment.data.state === 'AUTHORIZED' ? 'SUCCESS' : 'FAILED',
-        paid_amount: payment.data.amount.value,
+        paid_amount: payment.data.amount.value / 100,
         payment_method: payment.data.paymentMethod.type,
+        user: {
+            student_ids: {
+                isMember: true,
+                membershipId: [existingDoc.user.student_ids.membershipId],
+                memberships: [existingDoc.user.student_ids.membershipId],
+            }
+        }
     });
     log('Payment document updated: ' + JSON.stringify(paymentDoc));
     return res.json({ payment });   
