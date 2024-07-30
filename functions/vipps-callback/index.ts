@@ -88,17 +88,16 @@ export default async ({ req, res, log, error }: Context) => {
     ]);
     console.log(existingDoc);
 
+    const updateStudentId = await databases.updateDocument('app', 'student_idsæ', existingDoc.student_id, {
+        is_member: true,
+        membership_id: existingDoc.membership_id,
+        memberships: [existingDoc.membership_id],
+    });
+
     const paymentDoc = await databases.updateDocument('app', 'payments', payment.data.reference, {
         status: payment.data.state === 'AUTHORIZED' ? 'SUCCESS' : 'FAILED',
         paid_amount: payment.data.amount.value,
         payment_method: payment.data.paymentMethod.type,
-        user: {
-            studentId: {
-                isMember: true,
-                membershipId: [existingDoc.membership_id],
-                memberships: [existingDoc.membership_id],
-            }
-        }
     });
     log('Payment document updated: ' + JSON.stringify(paymentDoc));
     return res.json({ payment });   
