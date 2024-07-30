@@ -1,5 +1,5 @@
 import { getCheckout, getPayment, getAccessToken } from "../../packages/vipps/src/index.js";
-import { createAdminClient } from "@biso/appwrite";
+import { createAdminClient, Query } from "@biso/appwrite";
 
 type Context = {
     req: any;
@@ -83,7 +83,9 @@ export default async ({ req, res, log, error }: Context) => {
 
     log('Payment found: ' + JSON.stringify(payment));
 
-    const existingDoc = await databases.getDocument('app', 'payments', payment.data.reference);
+    const existingDoc = await databases.getDocument('app', 'payments', payment.data.reference, [
+        Query.select(['membership_id'])
+    ]);
     console.log(existingDoc);
 
     const paymentDoc = await databases.updateDocument('app', 'payments', payment.data.reference, {
