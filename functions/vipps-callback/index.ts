@@ -93,7 +93,7 @@ export default async ({ req, res, log, error }: Context) => {
         paid_amount: payment.data.amount.value,
         payment_method: payment.data.paymentMethod.type,
         user: {
-            student_id: {
+            studentId: {
                 isMember: true,
                 membershipId: [existingDoc.membership_id],
                 memberships: [existingDoc.membership_id],
