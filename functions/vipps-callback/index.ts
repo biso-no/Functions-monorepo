@@ -8,6 +8,35 @@ type Context = {
     error: (msg: any) => void;
 };
 
+interface PaymentData {
+    ok: boolean;
+    data: {
+      aggregate: {
+        authorizedAmount: Amount;
+        cancelledAmount: Amount;
+        capturedAmount: Amount;
+        refundedAmount: Amount;
+      };
+      amount: Amount;
+      state: string;
+      paymentMethod: PaymentMethod;
+      profile: object;
+      pspReference: string;
+      redirectUrl: string;
+      reference: string;
+    };
+  }
+  
+  interface Amount {
+    currency: string;
+    value: number;
+  }
+  
+  interface PaymentMethod {
+    type: string;
+    cardBin: string;
+  }
+
 export default async ({ req, res, log, error }: Context) => {
     log('On Vipps Payment POST request');
 
@@ -47,7 +76,7 @@ export default async ({ req, res, log, error }: Context) => {
         if (payment.ok) {
             log('Payment found: ' + JSON.stringify(payment));
 
-            const paymentDoc = await databases.updateDocument('app', 'payment', reference, {
+            const paymentDoc = await databases.updateDocument('app', 'payments', reference, {
                 status: name,
                 paid_amount: success ? amount.value : 0,
                 payment_method: success ? payment.data.paymentMethod : null,
