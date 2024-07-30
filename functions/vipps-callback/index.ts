@@ -87,7 +87,7 @@ export default async ({ req, res, log, error }: Context) => {
 
     const paymentDoc = await databases.updateDocument('app', 'payments', payment.data.reference, {
         status: payment.data.state === 'AUTHORIZED' ? 'SUCCESS' : 'FAILED',
-        paid_amount: payment.data.amount.value / 100,
+        paid_amount: payment.data.amount.value,
         payment_method: payment.data.paymentMethod.type,
         user: {
             student_ids: {
