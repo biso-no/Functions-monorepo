@@ -91,7 +91,7 @@ export default async ({ req, res, log, error }: Context) => {
     const paymentDoc = await databases.updateDocument('app', 'payments', reference, {
         status: success ? 'SUCCESS' : 'FAILED',
         paid_amount: success ? amount.value : 0,
-        payment_method: payment.data.paymentMethod
+        payment_method: payment.data.paymentMethod.type
     });
     log('Payment document updated: ' + JSON.stringify(paymentDoc));
     return res.json({ payment });   
