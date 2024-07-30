@@ -84,6 +84,7 @@ export default async ({ req, res, log, error }: Context) => {
     log('Payment found: ' + JSON.stringify(payment));
 
     const existingDoc = await databases.getDocument('app', 'payments', payment.data.reference);
+    console.log(existingDoc);
 
     const paymentDoc = await databases.updateDocument('app', 'payments', payment.data.reference, {
         status: payment.data.state === 'AUTHORIZED' ? 'SUCCESS' : 'FAILED',
