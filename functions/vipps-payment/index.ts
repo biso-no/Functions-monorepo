@@ -55,17 +55,21 @@ export default async ({ req, res, log, error }: Context) => {
         if (checkout.ok) {
             log('Checkout created: ' + JSON.stringify(checkout));
             log('Initiating Session Client...');
-            const { databases } = await createSessionClient(req.headers['x-appwrite-user-jwt'] as string);
+            const { databases, account } = await createSessionClient(req.headers['x-appwrite-user-jwt'] as string);
 
             log('Creating checkout document...');
+
+            const user = await account.get();
 
             const doc = await databases.createDocument('app', 'payments', reference, {
                 reference,
                 amount,
                 description,
-                membership: membershipId,
-                membership_id: membershipId,
+                membership: membershipId as string,
+                membership_id: membershipId as string,
                 status: 'CREATED',
+                user_id: user.$id,
+                user: user.$id,
             });
 
             log('Checkout document created: ' + JSON.stringify(doc));
