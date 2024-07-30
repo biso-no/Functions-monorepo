@@ -77,7 +77,7 @@ export default async ({ req, res, log, error }: Context) => {
     const { databases } = await createAdminClient();
     if (!payment.ok) {
         log('Error getting payment:' + payment.error);
-        const paymentDoc = await databases.updateDocument('app', 'payment', reference, {
+        const paymentDoc = await databases.updateDocument('app', 'payments', reference, {
             status: 'failed',
             paid_amount: 0,
             payment_method: 'unknown',
