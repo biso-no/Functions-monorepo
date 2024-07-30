@@ -9,53 +9,63 @@ type Context = {
 };
 
 export default async ({ req, res, log, error }: Context) => {
-log('On Vipps Payment POST request');
-    
-const webhookSecret = process.env.VIPPS_WEBHOOK_SECRET!;
-log("Request: " + JSON.stringify(req));
+    log('On Vipps Payment POST request');
 
-const body = JSON.parse(req.body);
+    const webhookSecret = process.env.VIPPS_WEBHOOK_SECRET!;
+    log("Request: " + JSON.stringify(req));
 
-log('Retreiving access token...');
-const token = await getAccessToken();
-if (token.ok) {
-log('Access token fetched: ' + JSON.stringify(token));
+    let body;
+    try {
+        body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch (err) {
+        if (err instanceof Error) {
+            error('JSON Parse error: ' + err.message);
+        } else {
+            error('Unknown error during JSON parsing');
+        }
+        return res.json({ error: 'Invalid JSON' });
+    }
 
-const { reference, name, amount, success } = body;
-log('Parsed request body: ' + JSON.stringify(body));
+    log('Retreiving access token...');
+    const token = await getAccessToken();
+    if (token.ok) {
+        log('Access token fetched: ' + JSON.stringify(token));
 
-if (!reference || !name || !amount || !success) {
-    log('Missing required parameters');
-    return res.json({ error: 'Missing required parameters' });
-}
+        const { reference, name, amount, success } = body;
+        log('Parsed request body: ' + JSON.stringify(body));
 
-const payment = await getPayment({
-    reference,
-    token: token.data.access_token,
-});
-const { databases } = await createAdminClient();
-if (payment.ok) {
-    log('Payment found: ' + JSON.stringify(payment));
+        if (!reference || !name || !amount || !success) {
+            log('Missing required parameters');
+            return res.json({ error: 'Missing required parameters' });
+        }
 
-    const paymentDoc = await databases.updateDocument('app', 'payment', reference, {
-        status: name,
-        paid_amount: success ? amount : 0,
-        payment_method: success ? payment.data.paymentMethod : null,
-    });
-    log('Payment document updated: ' + JSON.stringify(paymentDoc));
-    return res.json({ payment });
-} else {
-    log('Error getting payment:' + payment.error);
-    const paymentDoc = await databases.updateDocument('app', 'payment', reference, {
-        status: 'failed',
-        paid_amount: 0,
-        payment_method: null,
-    });
-    log('Payment document updated: ' + JSON.stringify(paymentDoc));
-    return res.json({ payment });
-}
-} else {
-    log('Error fetching access token: ' + token.error);
-    return res.json({ error: 'Failed to fetch access token' });
-}
+        const payment = await getPayment({
+            reference,
+            token: token.data.access_token,
+        });
+        const { databases } = await createAdminClient();
+        if (payment.ok) {
+            log('Payment found: ' + JSON.stringify(payment));
+
+            const paymentDoc = await databases.updateDocument('app', 'payment', reference, {
+                status: name,
+                paid_amount: success ? amount.value : 0,
+                payment_method: success ? payment.data.paymentMethod : null,
+            });
+            log('Payment document updated: ' + JSON.stringify(paymentDoc));
+            return res.json({ payment });
+        } else {
+            log('Error getting payment:' + payment.error);
+            const paymentDoc = await databases.updateDocument('app', 'payment', reference, {
+                status: 'failed',
+                paid_amount: 0,
+                payment_method: null,
+            });
+            log('Payment document updated: ' + JSON.stringify(paymentDoc));
+            return res.json({ payment });
+        }
+    } else {
+        log('Error fetching access token: ' + token.error);
+        return res.json({ error: 'Failed to fetch access token' });
+    }
 }
