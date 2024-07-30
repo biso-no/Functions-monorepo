@@ -1,4 +1,4 @@
-import { getCheckout } from "../../packages/vipps/src/index.js";
+import { getCheckout, getPayment, getAccessToken } from "../../packages/vipps/src/index.js";
 import { createAdminClient } from "@biso/appwrite";
 
 type Context = {
@@ -11,46 +11,51 @@ type Context = {
 export default async ({ req, res, log, error }: Context) => {
 log('On Vipps Payment POST request');
     
-const body = req.body;
-log('Body: ' + JSON.stringify(body));
-const bodyToJson = JSON.stringify(body);
-const { reference } = JSON.parse(req.body);
-    const { databases } = await createAdminClient();
-    try {
-    const checkout = await getCheckout(reference);
+const webhookSecret = process.env.VIPPS_WEBHOOK_SECRET!;
+log("Request: " + JSON.stringify(req));
 
-    if (checkout.ok) {
-        log('Checkout found: ' + JSON.stringify(checkout));
+const body = JSON.parse(req.body);
 
-        const paymentDoc = await databases.getDocument('app', 'payment', reference);
+log('Retreiving access token...');
+const token = await getAccessToken();
+if (token.ok) {
+log('Access token fetched: ' + JSON.stringify(token));
 
-        const membershipUpdated = await databases.updateDocument('app', 'user', paymentDoc.user.$id, {
-            student_id: {
-                isMember: true,
-            }
-        });
+const { reference, name, amount, success } = body;
+log('Parsed request body: ' + JSON.stringify(body));
 
-        const doc = await databases.updateDocument('app', 'checkout', reference, {
-            payment_method: checkout.data.paymentMethod,
-            status: checkout.data.sessionState,
-            paid_amount: checkout.data.paymentDetails?.amount
-        });
-        log('Checkout document updated: ' + JSON.stringify(doc));
-        return res.json({ checkout });
-      } else {
-        log('Error getting checkout:' + checkout.error);
-        const doc = await databases.updateDocument('app', 'checkout', reference, {
-            status: checkout.error
-        });
-        log('Checkout document updated: ' + JSON.stringify(doc));
-        return res.json({ checkout });
-      }
-    } catch (error) {
-        log('Error initiating checkout:' + error);
-        const doc = await databases.updateDocument('app', 'checkout', reference, {
-            status: error
-        });
-        log('Checkout document updated: ' + JSON.stringify(doc));
-        return res.json({ error: 'Failed to initiate checkout' });
-      }
+if (!reference || !name || !amount || !success) {
+    log('Missing required parameters');
+    return res.json({ error: 'Missing required parameters' });
+}
+
+const payment = await getPayment({
+    reference,
+    token: token.data.access_token,
+});
+const { databases } = await createAdminClient();
+if (payment.ok) {
+    log('Payment found: ' + JSON.stringify(payment));
+
+    const paymentDoc = await databases.updateDocument('app', 'payment', reference, {
+        status: name,
+        paid_amount: success ? amount : 0,
+        payment_method: success ? payment.data.paymentMethod : null,
+    });
+    log('Payment document updated: ' + JSON.stringify(paymentDoc));
+    return res.json({ payment });
+} else {
+    log('Error getting payment:' + payment.error);
+    const paymentDoc = await databases.updateDocument('app', 'payment', reference, {
+        status: 'failed',
+        paid_amount: 0,
+        payment_method: null,
+    });
+    log('Payment document updated: ' + JSON.stringify(paymentDoc));
+    return res.json({ payment });
+}
+} else {
+    log('Error fetching access token: ' + token.error);
+    return res.json({ error: 'Failed to fetch access token' });
+}
 }

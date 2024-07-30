@@ -26,13 +26,7 @@ export default async ({ req, res, log, error }: Context) => {
     log('Access token fetched: ' + JSON.stringify(token));
 
     // Ensure the body is parsed correctly
-    let body;
-    try {
-        body = JSON.parse(req.body);
-    } catch (err) {
-        log('Error parsing request body: ' + err);
-        return res.json({ error: 'Invalid JSON' });
-    }
+   const body = JSON.parse(req.body);
 
     const { amount, description, returnUrl, membershipId, phoneNumber, paymentMethod, membershipName } = body;
     log('Parsed request body: ' + JSON.stringify(body));
@@ -75,7 +69,7 @@ export default async ({ req, res, log, error }: Context) => {
             });
 
             log('Checkout document created: ' + JSON.stringify(doc));
-
+            
             return res.json({ checkout });
         } else {
             log('Error initiating checkout: ' + JSON.stringify(checkout.error));
