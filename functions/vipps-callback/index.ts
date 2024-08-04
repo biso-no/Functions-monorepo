@@ -95,7 +95,7 @@ export default async ({ req, res, log, error }: Context) => {
 
     const updateStudentMembership = await databases.updateDocument('app', 'student_id', studentId.student_id, {
         isMember: true,
-        membership_id: existingDoc.membership_id,
+        membership_ids: [existingDoc.membership_id],
         memberships: [existingDoc.membership_id],
     });
 
