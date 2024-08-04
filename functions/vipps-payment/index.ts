@@ -1,5 +1,4 @@
-import { EPaymentMethodType } from "@vippsmobilepay/sdk";
-import { createPayment, getAccessToken } from "../../packages/vipps/src/index.js";
+import { createPayment, getAccessToken, EPaymentMethodType } from "@biso/vipps";
 import { createSessionClient, ID } from "@biso/appwrite";
 
 type Context = {
