@@ -93,7 +93,7 @@ export default async ({ req, res, log, error }: Context) => {
     ]);
     log("Student ID: " + JSON.stringify(studentId));
 
-    const updateStudentMembership = await databases.updateDocument('app', 'student_id', studentId.$id, {
+    const updateStudentMembership = await databases.updateDocument('app', 'student_id', studentId.student_id, {
         isMember: true,
         membership_id: existingDoc.membership_id,
         memberships: [existingDoc.membership_id],
