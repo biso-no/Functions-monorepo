@@ -88,7 +88,7 @@ export default async ({ req, res, log, error }: Context) => {
     ]);
     log("Existing doc: " + JSON.stringify(existingDoc));
 
-    const studentId = await databases.listDocuments('app', 'student_ids', [
+    const studentId = await databases.listDocuments('app', 'student_id', [
         Query.select(['$id']),
         Query.equal('user_id', existingDoc.user_id)
     ]);
@@ -99,7 +99,7 @@ export default async ({ req, res, log, error }: Context) => {
     log("Student ID doc: " + JSON.stringify(studentIdDoc));
 
     log("Updating student ID doc: " + JSON.stringify(studentIdDoc));
-    const updateStudentId = await databases.updateDocument('app', 'student_ids', studentIdDoc.$id, {
+    const updateStudentId = await databases.updateDocument('app', 'student_id', studentIdDoc.$id, {
         isMember: true,
         membership_id: existingDoc.membership_id,
         memberships: [existingDoc.membership_id],
