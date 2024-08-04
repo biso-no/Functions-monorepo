@@ -88,32 +88,27 @@ export default async ({ req, res, log, error }: Context) => {
     ]);
     log("Existing doc: " + JSON.stringify(existingDoc));
 
-    const studentId = await databases.listDocuments('app', 'student_id', [
-        Query.select(['$id']),
-        Query.equal('user_id', existingDoc.user_id)
+    const studentId = await databases.getDocument('app', 'user', existingDoc.user_id, [
+        Query.select(['$id', 'student_id'])
     ]);
-    log("Student IDs: " + JSON.stringify(studentId));
+    log("Student ID: " + JSON.stringify(studentId));
 
-    const studentIdDoc = studentId.documents[0];
-
-    log("Student ID doc: " + JSON.stringify(studentIdDoc));
-
-    log("Updating student ID doc: " + JSON.stringify(studentIdDoc));
-    const updateStudentId = await databases.updateDocument('app', 'student_id', studentIdDoc.$id, {
+    const updateStudentMembership = await databases.updateDocument('app', 'student_id', studentId.$id, {
         isMember: true,
         membership_id: existingDoc.membership_id,
         memberships: [existingDoc.membership_id],
     });
 
-    log("Updated student ID doc: " + JSON.stringify(updateStudentId));
+    log("Updated student membership: " + JSON.stringify(updateStudentMembership));
 
     const updatePayment = await databases.updateDocument('app', 'payments', payment.data.reference, {
         status: payment.data.state === 'AUTHORIZED' ? 'SUCCESS' : 'FAILED',
         paid_amount: payment.data.amount.value,
         payment_method: payment.data.paymentMethod.type,
-    });
+    })
+
     log('Payment document updated: ' + JSON.stringify(updatePayment));
 
-    return res.json({ payment });
+    return res.json({ payment, studentId });
 
 }
