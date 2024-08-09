@@ -22,7 +22,7 @@ interface RequestBody {
     $id: string;
 }
 
-const SHOULD_INVOICE = process.env.SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
+const SHOULD_INVOICE = process.env.SHOULD_INVOICE!
 
 export default async ({ req, res, log, error }: Context) => {
     try {
@@ -86,10 +86,12 @@ export default async ({ req, res, log, error }: Context) => {
 
         const customerCategoryId = await updateCustomerCategory(token, membershipObj.category, user.student_id);
 
+        //If SHOULD_INVOICE = true then let invoiceStatus be Invoiced. else let invoiceStatus be Draft
+        const invoiceStatus = SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
 
         const invoiceResponse = await createInvoice(token, {
             CustomerId: existingCustomer.id,
-            OrderStatus: SHOULD_INVOICE,
+            OrderStatus: invoiceStatus,
             DepartmentId: departmentId,
             IncludeVAT: true,
             PaymentMethodId: 1,
