@@ -22,6 +22,8 @@ interface RequestBody {
     $id: string;
 }
 
+const SHOULD_INVOICE = process.env.SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
+
 export default async ({ req, res, log, error }: Context) => {
     try {
         log('Parsing request body...');
@@ -88,7 +90,7 @@ export default async ({ req, res, log, error }: Context) => {
 
         const invoiceResponse = await createInvoice(token, {
             CustomerId: existingCustomer.id,
-            OrderStatus: 'Invoiced',
+            OrderStatus: SHOULD_INVOICE,
             DepartmentId: departmentId,
             IncludeVAT: true,
             PaymentMethodId: 1,
