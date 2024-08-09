@@ -27,8 +27,9 @@ const SHOULD_INVOICE = process.env.SHOULD_INVOICE!
 export default async ({ req, res, log, error }: Context) => {
     try {
         log('Parsing request body...');
-        const body = JSON.parse(req.body) as RequestBody;
-        const { reference, amount, description, membership_id, status, paid_amount, user, payment_method, user_id, $id, membership } = body;
+        log('Request body: ' + JSON.stringify(req.body));
+        const body = JSON.parse(req.body);
+        const { reference, amount, description, membership_id, status, paid_amount, user, payment_method, user_id, $id, membership } = body as RequestBody;
 
         log(`Parsed request body: ${JSON.stringify(body)}`);
 
