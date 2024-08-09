@@ -78,7 +78,6 @@ export default async ({ req, res, log, error }: Context) => {
         const token = await tokenResponse.json();
 
         const departmentId = determineDepartmentId(user.campus.$id);
-        const campusName = determineCampusName(user.campus.$id);
         const accrualDate = determineAccrualDate();
         const accrualLength = 6;
 
@@ -97,12 +96,12 @@ export default async ({ req, res, log, error }: Context) => {
             UserDefinedDimensions: [
                 {
                     Type: UserDefinedDimensionKey.UserDefined,
-                    Name: campusName,
+                    Name: user.campus.name,
                     TypeId: '101',
                 },
                 {
                     Type: UserDefinedDimensionKey.UserDefined,
-                    Name: determineMembershipId(membership_id),
+                    Name: membershipObj.name,
                     TypeId: '102',
                 },
             ],
@@ -149,34 +148,6 @@ function determineDepartmentId(campusId: string): number {
     }
 }
 
-// Utility function to determine campus name based on campus ID
-function determineCampusName(campusId: string): string {
-    switch (campusId) {
-        case '1':
-            return 'Oslo';
-        case '2':
-            return 'Bergen';
-        case '3':
-            return 'Trondheim';
-        case '4':
-            return 'Stavanger';
-        default:
-            return 'National';
-    }
-}
-
-function determineMembershipId(membershipId: string): string {
-    switch (membershipId) {
-        case '100':
-            return 'Semester';
-        case '200':
-            return 'Year';
-        case '300':
-            return '3 Years';
-        default:
-            return 'Unknown';
-    }
-}
 
 // Utility function to determine accrual date based on current date
 function determineAccrualDate(): Date {
