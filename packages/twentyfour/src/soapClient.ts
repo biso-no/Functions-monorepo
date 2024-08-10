@@ -1,3 +1,4 @@
+import { Models } from '@biso/appwrite';
 import axios from 'axios';
 import { parseStringPromise } from 'xml2js';
 
@@ -64,6 +65,23 @@ interface InvoiceOrder {
     AccrualLength?: number; 
     InvoiceRows?: InvoiceRow[]; 
     UserDefinedDimensions?: UserDefinedDimensions[]; 
+}
+
+interface Company {
+  Id: number;
+  Name: string; // Max length 200 characters
+  FirstName?: string; // Max length 50 characters, only in use on Company Type ‘Consumer’
+  Type: 'None' | 'Lead' | 'Consumer' | 'Business' | 'Supplier'; // Enum
+  DistributionMethod?: 'Default' | 'Unchanged' | 'Print' | 'EMail' | 'ElectronicInvoice'; // Enum
+  CurrencyId?: string; // Default: LOCAL
+  PaymentTime?: number; // Special conditions described in the text
+  GLNNumber?: string; // Default value: “”. Max length 13 characters
+  Factoring?: boolean;
+  LedgerCustomerAccount?: number; // The account number used for the customer ledger
+  LedgerSupplierAccount?: number; // The account number used for the supplier ledger
+  VatNumber?: string;
+  Private?: boolean; // False = "visible to all", true = "visible to owner"
+  ExplicitlySpecifyNewCompanyId?: boolean; // Set companyId explicitly
 }
 
 export const soapClient = () => {
@@ -245,11 +263,111 @@ export const soapClient = () => {
         throw error;
     }
 };
+const getCustomer = async (token: string, customerId: number) => {
+  try {
+    const body = `<?xml version="1.0" encoding="utf-8"?>
+    <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+      <soap12:Body>
+        <GetCompanies xmlns="http://24sevenOffice.com/webservices">
+          <searchParams>
+            <CompanyId>${customerId}</CompanyId>
+          </searchParams>
+          <returnProperties>
+            <string>Name</string>
+          </returnProperties>
+        </GetCompanies>
+      </soap12:Body>
+    </soap12:Envelope>`;
+
+    const response = await axios.post('https://api.24sevenoffice.com/CRM/Company/V001/CompanyService.asmx', body, {
+        headers: {
+            'Content-Type': 'application/soap+xml; charset=utf-8',
+            'Cookie': 'ASP.NET_SessionId=' + token
+        }
+    });
+
+    const parsedResponse = await parseStringPromise(response.data, {
+        explicitArray: false, // Prevent arrays for single elements
+        ignoreAttrs: true // Ignore attributes
+    });
+
+    // Extract the customer(s) from the parsed response
+    const companies = parsedResponse['soap:Envelope']['soap:Body']['GetCompaniesResponse']?.['GetCompaniesResult']?.['Company'];
+
+    // Ensure that there is at least one company in the response
+    if (!companies) {
+        throw new Error('No companies found in the response');
+    }
+
+    // If companies is an array, return the first company, otherwise return the single company object
+    return Array.isArray(companies) ? companies[0] : companies;
+
+  } catch (error) {
+    console.error('Error during customer retrieval:', error);
+    throw error;
+  }
+};
+
+
+
+const createCustomer = async (token: string, user: Models.Document) => {
+  try {
+    const firstName = user.name.split(' ')[0];
+
+    const body = `<?xml version="1.0" encoding="utf-8"?>
+    <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+      <soap12:Body>
+        <SaveCompanies xmlns="http://24sevenOffice.com/webservices">
+          <companies>
+            <Company>
+              <Id>${user.student_id}</Id>
+              <Name>(Student) ${user.name}</Name>
+              <FirstName>${firstName}</FirstName>
+              <Type>Consumer</Type>
+            </Company>
+          </companies>
+        </SaveCompanies>
+      </soap12:Body>
+    </soap12:Envelope>`;
+
+    const response = await axios.post('https://api.24sevenoffice.com/CRM/Company/V001/CompanyService.asmx', body, {
+        headers: {
+            'Content-Type': 'application/soap+xml; charset=utf-8',
+            'Cookie': 'ASP.NET_SessionId=' + token
+        }
+    });
+
+    const parsedResponse = await parseStringPromise(response.data, {
+        explicitArray: false, // This option prevents arrays from being created for each element
+        ignoreAttrs: true // This option ignores the attributes and only parses the values
+    });
+
+    // Extract the array of companies from the parsed response
+    const companies = parsedResponse['soap:Envelope']['soap:Body']['SaveCompaniesResponse']?.['SaveCompaniesResult']?.['Company'];
+
+    // Ensure that there is at least one company in the response
+    if (!companies) {
+        throw new Error('No companies found in the response');
+    } 
+
+    // If companies is an array, return the first company, otherwise return the single company object
+    return Array.isArray(companies) ? companies[0] : companies;
+
+      } catch (error) {
+          console.error('Error during customer creation:', error);
+          throw error;
+      }
+};
+
+
+
 
     return {
         getAccessToken,
         createInvoice,
         getCustomerCategories,
-        updateCustomerCategory
+        updateCustomerCategory,
+        getCustomer,
+        createCustomer
     };
 };

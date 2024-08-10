@@ -41,26 +41,18 @@ export default async ({ req, res, log, error }: Context) => {
             return res.json({ error: 'Missing required parameters' });
         }
 
-        const { create, get, update } = await customer();
         let existingCustomer: Customer | null = null;
+        const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer } = soapClient();
+        const tokenResponse = await getAccessToken();
 
-        const response = await get(user.student_id);
+        const response = await getCustomer(tokenResponse.data, user.student_id);
         log('Response: ' + JSON.stringify(response));
         if (response.ok) {
             existingCustomer = await response.json() as Customer;
             log(`Existing customer found for user_id: ${user_id} - ${JSON.stringify(existingCustomer)}`);
         } else {
             log(`Customer not found for user_id: ${user_id}, creating new customer...`);
-            const customerResponse = await create({
-                id: user.student_id,
-                name: user.name,
-                email: {
-                    contact: user.email,
-                    billing: user.email,
-                },
-                isCompany: false,
-                isSupplier: false,
-            });
+            const customerResponse = await createCustomer(tokenResponse.data, user);
 
             if (!customerResponse.ok) {
                 log('Failed to create customer');
@@ -71,8 +63,7 @@ export default async ({ req, res, log, error }: Context) => {
             log(`New customer created with ID: ${existingCustomer.id} for user_id: ${user_id}`);
         }
 
-        const { createInvoice, getAccessToken, updateCustomerCategory } = soapClient();
-        const tokenResponse = await getAccessToken();
+
 
         if (!tokenResponse.ok) {
             log('Failed to retrieve access token');
