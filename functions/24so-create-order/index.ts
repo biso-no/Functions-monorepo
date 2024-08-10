@@ -93,7 +93,7 @@ export default async ({ req, res, log, error }: Context) => {
         const customerCategoryId = await updateCustomerCategory(accessToken, membershipObj.category, studentId);
 
         const invoiceStatus = SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
-        const accrualLength = determineAccrualLength(membershipObj.type);
+        const accrualLength = determineAccrualLength(description);
 
         const invoiceResponse = await createInvoice(accessToken, {
             CustomerId: studentId,
