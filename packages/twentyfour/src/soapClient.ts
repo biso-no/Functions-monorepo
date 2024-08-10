@@ -1,6 +1,7 @@
 import { Models } from '@biso/appwrite';
 import axios from 'axios';
 import { parseStringPromise } from 'xml2js';
+import fetch from 'node-fetch';
 
 const AUTH_URL = 'https://api.24sevenoffice.com/authenticate/v001/authenticate.asmx';
 const INVOICE_URL = 'https://api.24sevenoffice.com/Economy/InvoiceOrder/V001/InvoiceService.asmx';
@@ -179,18 +180,16 @@ export const soapClient = () => {
     
       try {
         // No need to sanitize if SOAP_BODY is constructed properly
-        const response = await axios.post(INVOICE_URL, SOAP_BODY, {
+        const response = await fetch(INVOICE_URL, {
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/soap+xml; charset=utf-8',
                 'Cookie': `ASP_NET.SessionId=${accessToken}`
-            }
+            },
+            body: SOAP_BODY
         });
     
-        if (response.status !== 200) {
-            throw new Error('Failed to create invoice');
-        }
-    
-        const responseText = response.data;
+        const responseText = await response.text();
         const match = responseText.match(/<InvoiceId>(.*)<\/InvoiceId>/);
         if (!match) {
             throw new Error('Invoice ID not found in response');
