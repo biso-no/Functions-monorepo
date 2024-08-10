@@ -1,5 +1,6 @@
 import { getCheckout, getPayment, getAccessToken } from "../../packages/vipps/src/index.js";
 import { createAdminClient, Query } from "@biso/appwrite";
+import { CryptoHasher } from "bun";
 
 type Context = {
     req: any;
@@ -37,11 +38,23 @@ interface PaymentData {
     cardBin: string;
   }
 
+const hash = new CryptoHasher("sha256");
+
 export default async ({ req, res, log, error }: Context) => {
     log('On Vipps Payment POST request');
 
     const webhookSecret = process.env.VIPPS_WEBHOOK_SECRET!;
     log("Request: " + JSON.stringify(req));
+
+    const requestHeaders = req.headers;
+const xMsContentSha256 = requestHeaders['x-ms-content-sha256'];
+
+    const expectedContentHash = hash.update(req.body).digest("base64");
+
+    if (expectedContentHash !== xMsContentSha256) {
+        log('Invalid content hash');
+        return res.json({ error: 'Invalid content hash' });
+    }
 
     let body;
     try {
