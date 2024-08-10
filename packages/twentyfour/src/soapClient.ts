@@ -89,7 +89,7 @@ const sanitizeXmlString = (xml: string) => {
   return xml.replace(/\n/g, '').replace(/\r/g, '').replace(/\t/g, '');
 };
 
-export const soapClient = () => {
+export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) => {
 
     const getAccessToken = async () => {
         const SOAP_BODY = `<?xml version="1.0" encoding="utf-8"?>
@@ -126,7 +126,7 @@ export const soapClient = () => {
                 status: 'ok'
             }
         } catch (error) {
-            console.error('Error during authentication:', error);
+            log('Error during authentication: ' + error);
             return {
                 status: 'error',
                 error: error
@@ -180,15 +180,21 @@ export const soapClient = () => {
     
         // No need to sanitize if SOAP_BODY is constructed properly
         const response = await fetch(INVOICE_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/soap+xml; charset=utf-8',
-                'Cookie': `ASP_NET.SessionId=${accessToken}`
-            },
-            body: SOAP_BODY
-        });
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/soap+xml; charset=utf-8',
+              'Cookie': `ASP_NET.SessionId=${accessToken}`
+          },
+          body: SOAP_BODY
+      });
+      
+      const responseText = await response.text();
+      log('Invoice response status: ' + response.status);
+      log('Invoice response headers: ' + JSON.stringify(response.headers));
+      log('Invoice response body: ' + responseText);
+      
     
-        return response;
+        return responseText;
       }
       
   
@@ -218,7 +224,7 @@ export const soapClient = () => {
           return categories;
 
       } catch (error) {
-          console.error('Error during customer category retrieval:', error);
+          log('Error during customer category retrieval: ' + error);
           throw error;
       }
   };
@@ -261,7 +267,7 @@ export const soapClient = () => {
         return true;
 
     } catch (error) {
-        console.error('Error during customer category update:', error);
+        log('Error during customer category update: ' + error);
         throw error;
     }
 };
@@ -307,7 +313,7 @@ const getCustomer = async (token: string, customerId: number) => {
     return Array.isArray(companies) ? companies[0] : companies;
 
   } catch (error) {
-    console.error('Error during customer retrieval:', error);
+    log('Error during customer retrieval: ' + error);
     throw error;
   }
 };
@@ -360,7 +366,7 @@ const createCustomer = async (token: string, user: Models.Document) => {
     return Array.isArray(companies) ? companies[0] : companies;
 
       } catch (error) {
-          console.error('Error during customer creation:', error);
+          log('Error during customer creation: ' + error);
           throw error;
       }
 };

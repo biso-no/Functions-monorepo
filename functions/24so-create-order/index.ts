@@ -41,7 +41,7 @@ export default async ({ req, res, log, error }: Context) => {
         }
 
         let existingCustomer: Customer | null = null;
-        const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer } = soapClient();
+        const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer } = soapClient(log, error);
         const { accessToken, status: tokenStatus } = await getAccessToken();
         if (tokenStatus !== 'ok') {
             log('Failed to retrieve access token');
