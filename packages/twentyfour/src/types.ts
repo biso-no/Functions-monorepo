@@ -65,23 +65,6 @@ export interface CustomerParams {
 }
 
 export interface Customer {
-    id: number;
-    name: string;
-    email?: {
-        billing?: string;
-        contact?: string;
-    };
-    phone?: string;
-    address?: {
-        visit?: {
-            street?: string;
-            postalArea?: string;
-            postalCode?: string;
-            countryCode?: string;
-            countrySubdivision?: string;
-        }
-    };
-    isCompany?: boolean;
-    isSupplier?: boolean;
-    organizationNumber?: string;
+    Id: number;
+    Name: string;
 }

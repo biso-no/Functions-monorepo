@@ -51,8 +51,8 @@ export default async ({ req, res, log, error }: Context) => {
         log('Token response: ' + JSON.stringify(accessToken));
         const response = await getCustomer(accessToken, user.student_id);
         log('Response: ' + JSON.stringify(response));
-        if (response.ok) {
-            existingCustomer = await response.json() as Customer;
+        if (response) {
+            existingCustomer = await response as Customer;
             log(`Existing customer found for user_id: ${user_id} - ${JSON.stringify(existingCustomer)}`);
         } else {
             log(`Customer not found for user_id: ${user_id}, creating new customer...`);
@@ -64,7 +64,7 @@ export default async ({ req, res, log, error }: Context) => {
             }
 
             existingCustomer = await customerResponse.json() as Customer;
-            log(`New customer created with ID: ${existingCustomer.id} for user_id: ${user_id}`);
+            log(`New customer created with ID: ${existingCustomer.Id} for user_id: ${user_id}`);
         }
 
         const departmentId = determineDepartmentId(user.campus.$id);
@@ -95,7 +95,7 @@ export default async ({ req, res, log, error }: Context) => {
         const invoiceStatus = SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
 
         const invoiceResponse = await createInvoice(accessToken, {
-            CustomerId: existingCustomer.id,
+            CustomerId: existingCustomer.Id,
             OrderStatus: invoiceStatus,
             DepartmentId: departmentId,
             IncludeVAT: true,
