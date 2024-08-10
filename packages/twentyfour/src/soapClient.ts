@@ -84,6 +84,10 @@ interface Company {
   ExplicitlySpecifyNewCompanyId?: boolean; // Set companyId explicitly
 }
 
+const sanitizeXmlString = (xml: string) => {
+  return xml.replace(/\n/g, '').replace(/\r/g, '').replace(/\t/g, '');
+};
+
 export const soapClient = () => {
 
     const getAccessToken = async () => {
@@ -170,7 +174,8 @@ export const soapClient = () => {
 </soap12:Envelope>`;
 
         try {
-            const response = await axios.post(INVOICE_URL, SOAP_BODY, {
+          const sanitizedSoapBody = sanitizeXmlString(SOAP_BODY);
+            const response = await axios.post(INVOICE_URL, sanitizedSoapBody, {
                 headers: {
                     'Content-Type': 'application/soap+xml; charset=utf-8',
                     'Cookie': `ASP_NET.SessionId=${accessToken}`
