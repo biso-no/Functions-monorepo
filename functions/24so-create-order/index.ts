@@ -49,7 +49,8 @@ export default async ({ req, res, log, error }: Context) => {
             return res.json({ error: 'Failed to retrieve access token' });
         }
         log('Token response: ' + JSON.stringify(accessToken));
-        const response = await getCustomer(accessToken, user.student_id);
+        const studentId = parseInt(user.student_id.replace('s', ''));
+        const response = await getCustomer(accessToken, studentId);
         log('Response: ' + JSON.stringify(response));
         if (response) {
             existingCustomer = await response as Customer;
@@ -58,7 +59,7 @@ export default async ({ req, res, log, error }: Context) => {
             log(`Customer not found for user_id: ${user_id}, creating new customer...`);
             const customerResponse = await createCustomer(accessToken, user);
 
-            if (!customerResponse.ok) {
+            if (!customerResponse) {
                 log('Failed to create customer');
                 return res.json({ error: 'Failed to create customer' });
             }
@@ -90,12 +91,12 @@ export default async ({ req, res, log, error }: Context) => {
             return res.json({ error: 'Invalid membership object' });
         }
 
-        const customerCategoryId = await updateCustomerCategory(accessToken, membershipObj.category, user.student_id);
+        const customerCategoryId = await updateCustomerCategory(accessToken, membershipObj.category, studentId);
 
         const invoiceStatus = SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
 
         const invoiceResponse = await createInvoice(accessToken, {
-            CustomerId: existingCustomer.Id,
+            CustomerId: studentId,
             OrderStatus: invoiceStatus,
             DepartmentId: departmentId,
             IncludeVAT: true,
@@ -123,14 +124,14 @@ export default async ({ req, res, log, error }: Context) => {
             AccrualLength: accrualLength,
         });
 
-        if (!invoiceResponse.ok) {
+        if (!invoiceResponse) {
             log('Failed to create invoice');
             return res.json({ error: 'Failed to create invoice' });
         }
 
-        const invoice = await invoiceResponse.json() as { id: string };
-        log(`Invoice created successfully with ID: ${invoice.id} for user_id: ${user_id}`);
-        return res.json({ invoiceId: invoice.id });
+        const invoiceId = invoiceResponse;
+        log(`Invoice created successfully with ID: ${invoiceId} for user_id: ${user_id}`);
+        return res.json({ invoiceId: invoiceId });
 
     } catch (err) {
         const errorMessage = (err as Error).message;

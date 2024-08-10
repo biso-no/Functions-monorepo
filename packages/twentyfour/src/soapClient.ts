@@ -225,22 +225,22 @@ export const soapClient = () => {
       }
   };
 
-  const updateCustomerCategory = async (token: string, customerCategoryId: number, studentId: string) => {
+  const updateCustomerCategory = async (token: string, customerCategoryId: number, studentId: number) => {
     
     try {
         const body = `<?xml version="1.0" encoding="utf-8"?>
-                    <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-                      <soap12:Body>
-                        <SaveCustomerCategories xmlns="http://24sevenOffice.com/webservices">
-                          <customerCategories>
-                            <KeyValuePair>
-                              <Key>${customerCategoryId}</Key>
-                              <Value>${studentId}</Value>
-                            </KeyValuePair>
-                          </customerCategories>
-                        </SaveCustomerCategories>
-                      </soap12:Body>
-                    </soap12:Envelope>`;
+        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+          <soap12:Body>
+            <SaveCustomerCategories xmlns="http://24sevenOffice.com/webservices">
+              <customerCategories>
+                <KeyValuePair>
+                  <Key>${customerCategoryId}</Key>
+                  <Value>${studentId}</Value>
+                </KeyValuePair>
+              </customerCategories>
+            </SaveCustomerCategories>
+          </soap12:Body>
+        </soap12:Envelope>`;
 
         const response = await axios.post('https://api.24sevenoffice.com/CRM/Company/V001/CompanyService.asmx', body, {
             headers: {
@@ -267,16 +267,16 @@ export const soapClient = () => {
         throw error;
     }
 };
-const getCustomer = async (token: string, customerId: string) => {
+const getCustomer = async (token: string, customerId: number) => {
     //A student ID looks like this: s1715738. remove the s
-    const studentId = parseInt(customerId.replace('s', ''));
+
   try {
     const body = `<?xml version="1.0" encoding="utf-8"?>
     <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
       <soap12:Body>
         <GetCompanies xmlns="http://24sevenOffice.com/webservices">
           <searchParams>
-            <CompanyId>${studentId}</CompanyId>
+            <CompanyId>${customerId}</CompanyId>
           </searchParams>
           <returnProperties>
             <string>Name</string>
@@ -317,6 +317,8 @@ const getCustomer = async (token: string, customerId: string) => {
 
 
 const createCustomer = async (token: string, user: Models.Document) => {
+
+  const studentId = parseInt(user.student_id.replace('s', ''));
   try {
     const firstName = user.name.split(' ')[0];
 
@@ -326,7 +328,7 @@ const createCustomer = async (token: string, user: Models.Document) => {
         <SaveCompanies xmlns="http://24sevenOffice.com/webservices">
           <companies>
             <Company>
-              <Id>${user.student_id}</Id>
+              <Id>${studentId}</Id>
               <Name>(Student) ${user.name}</Name>
               <FirstName>${firstName}</FirstName>
               <Type>Consumer</Type>
