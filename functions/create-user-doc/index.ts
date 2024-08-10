@@ -21,6 +21,7 @@ export default async ({ req, res, log, error }: Context) => {
     log('On User Created POST request');
 
     const body = JSON.parse(req.body);
+    log('Parsed body: ' + JSON.stringify(body));
     const { email, $id } = body;
 
     if (!email) {
