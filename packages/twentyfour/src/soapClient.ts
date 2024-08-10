@@ -87,8 +87,7 @@ interface Company {
 export const soapClient = () => {
 
     const getAccessToken = async () => {
-        const SOAP_BODY = `
-        <?xml version="1.0" encoding="utf-8"?>
+        const SOAP_BODY = `<?xml version="1.0" encoding="utf-8"?>
         <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
           <soap12:Body>
             <Login xmlns="http://24sevenOffice.com/webservices">
@@ -125,8 +124,7 @@ export const soapClient = () => {
     };
 
     const createInvoice = async (accessToken: string, data: InvoiceOrder) => {
-        const invoiceRowsXML = data.InvoiceRows?.map(row => `
-            <InvoiceRow>
+        const invoiceRowsXML = data.InvoiceRows?.map(row => `<InvoiceRow>
               <ProductId>${row.ProductId ?? ''}</ProductId>
               <Price>${row.Price ?? ''}</Price>
               <Quantity>${row.Quantity ?? ''}</Quantity>
@@ -139,11 +137,10 @@ export const soapClient = () => {
               <TypeId>${udd.TypeId}</TypeId>
             </UserDefinedDimension>`).join('') || '';
 
-        const SOAP_BODY = `
-        <?xml version="1.0" encoding="utf-8"?>
-        <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-          <soap:Body>
-            <SaveInvoices xmlns="http://24sevenOffice.com/webservices">
+        const SOAP_BODY = `<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+  <soap:Body>
+    <SaveInvoices xmlns="http://24sevenOffice.com/webservices">
               <invoices>
                 <InvoiceOrder>
                   <CustomerId>${data.CustomerId}</CustomerId>
