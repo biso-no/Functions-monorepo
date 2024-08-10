@@ -150,6 +150,7 @@ export const soapClient = () => {
             <TypeId>${udd.TypeId}</TypeId>
           </UserDefinedDimension>`
       ).join('') || '';
+      
     
       const SOAP_BODY = `<?xml version="1.0" encoding="utf-8"?>
       <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -194,12 +195,15 @@ export const soapClient = () => {
         if (!match) {
             throw new Error('Invoice ID not found in response');
         }
-        return match[1];
+        return {
+            invoiceId: match[1],
+        }
       } catch (error) {
-        console.error('Error during invoice creation:', error);
-        throw error;
+        return {
+            error: error
       }
-    };
+    }
+  }
     
   
   
