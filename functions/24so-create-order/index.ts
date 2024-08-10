@@ -28,8 +28,11 @@ export default async ({ req, res, log, error }: Context) => {
     try {
         log('Parsing request body...');
         log('Request body: ' + JSON.stringify(req.body));
-        const body = JSON.parse(req.body);
-        const { reference, amount, description, membership_id, status, paid_amount, user, payment_method, user_id, $id, membership } = body as RequestBody;
+
+        // Use the req.body directly as it is already an object
+        const body = req.body as RequestBody;
+
+        const { reference, amount, description, membership_id, status, paid_amount, user, payment_method, user_id, $id, membership } = body;
 
         log(`Parsed request body: ${JSON.stringify(body)}`);
 
@@ -67,7 +70,6 @@ export default async ({ req, res, log, error }: Context) => {
             log(`New customer created with ID: ${existingCustomer.id} for user_id: ${user_id}`);
         }
 
-        // Proceed to create the invoice regardless of whether the customer existed or was newly created
         const { createInvoice, getAccessToken, updateCustomerCategory } = soapClient();
         const tokenResponse = await getAccessToken();
 
@@ -82,12 +84,27 @@ export default async ({ req, res, log, error }: Context) => {
         const accrualDate = determineAccrualDate();
         const accrualLength = 6;
 
-        //Convert membership from string to object
-        const membershipObj = JSON.parse(membership);
+        // Check if membership is a string and parse it, otherwise assume it's already an object
+        let membershipObj: any;
+        if (typeof membership === 'string') {
+            try {
+                membershipObj = JSON.parse(membership);
+            } catch (parseError) {
+                log('Failed to parse membership string');
+                return res.json({ error: 'Invalid membership format' });
+            }
+        } else {
+            membershipObj = membership;
+        }
+
+        // Ensure membershipObj has the expected properties
+        if (!membershipObj.category || !membershipObj.name) {
+            log('Membership object is missing required properties');
+            return res.json({ error: 'Invalid membership object' });
+        }
 
         const customerCategoryId = await updateCustomerCategory(token, membershipObj.category, user.student_id);
 
-        //If SHOULD_INVOICE = true then let invoiceStatus be Invoiced. else let invoiceStatus be Draft
         const invoiceStatus = SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
 
         const invoiceResponse = await createInvoice(token, {
@@ -134,6 +151,7 @@ export default async ({ req, res, log, error }: Context) => {
         return res.json({ error: errorMessage });
     }
 };
+
 
 // Utility function to determine department ID based on campus ID
 function determineDepartmentId(campusId: string): number {
