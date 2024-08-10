@@ -44,7 +44,7 @@ export default async ({ req, res, log, error }: Context) => {
         let existingCustomer: Customer | null = null;
         const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer } = soapClient();
         const tokenResponse = await getAccessToken();
-
+        log('Token response: ' + JSON.stringify(tokenResponse));
         const response = await getCustomer(tokenResponse.data, user.student_id);
         log('Response: ' + JSON.stringify(response));
         if (response.ok) {
