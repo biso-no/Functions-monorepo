@@ -183,10 +183,11 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
           method: 'POST',
           headers: {
               'Content-Type': 'application/soap+xml; charset=utf-8',
-              'Cookie': `ASP_NET.SessionId=${accessToken}`
+              'Cookie': `ASP_NET.SessionId=${await getAccessToken()}`,
           },
           body: SOAP_BODY
       });
+      
       
       const responseText = await response.text();
       log('Invoice response status: ' + response.status);
