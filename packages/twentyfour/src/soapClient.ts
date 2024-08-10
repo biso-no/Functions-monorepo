@@ -116,10 +116,16 @@ export const soapClient = () => {
             if (!match) {
                 throw new Error('Access token not found in response');
             }
-            return match[1];
+            return {
+                accessToken: match[1],
+                status: 'ok'
+            }
         } catch (error) {
             console.error('Error during authentication:', error);
-            throw error;
+            return {
+                status: 'error',
+                error: error
+            }
         }
     };
 

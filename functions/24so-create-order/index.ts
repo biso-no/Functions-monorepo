@@ -43,16 +43,20 @@ export default async ({ req, res, log, error }: Context) => {
 
         let existingCustomer: Customer | null = null;
         const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer } = soapClient();
-        const tokenResponse = await getAccessToken();
-        log('Token response: ' + JSON.stringify(tokenResponse));
-        const response = await getCustomer(tokenResponse.data, user.student_id);
+        const { accessToken, status: tokenStatus } = await getAccessToken();
+        if (tokenStatus !== 'ok') {
+            log('Failed to retrieve access token');
+            return res.json({ error: 'Failed to retrieve access token' });
+        }
+        log('Token response: ' + JSON.stringify(accessToken));
+        const response = await getCustomer(accessToken, user.student_id);
         log('Response: ' + JSON.stringify(response));
         if (response.ok) {
             existingCustomer = await response.json() as Customer;
             log(`Existing customer found for user_id: ${user_id} - ${JSON.stringify(existingCustomer)}`);
         } else {
             log(`Customer not found for user_id: ${user_id}, creating new customer...`);
-            const customerResponse = await createCustomer(tokenResponse.data, user);
+            const customerResponse = await createCustomer(accessToken, user);
 
             if (!customerResponse.ok) {
                 log('Failed to create customer');
@@ -62,15 +66,6 @@ export default async ({ req, res, log, error }: Context) => {
             existingCustomer = await customerResponse.json() as Customer;
             log(`New customer created with ID: ${existingCustomer.id} for user_id: ${user_id}`);
         }
-
-
-
-        if (!tokenResponse.ok) {
-            log('Failed to retrieve access token');
-            return res.json({ error: 'Failed to retrieve access token' });
-        }
-
-        const token = await tokenResponse.json();
 
         const departmentId = determineDepartmentId(user.campus.$id);
         const accrualDate = determineAccrualDate();
@@ -95,11 +90,11 @@ export default async ({ req, res, log, error }: Context) => {
             return res.json({ error: 'Invalid membership object' });
         }
 
-        const customerCategoryId = await updateCustomerCategory(token, membershipObj.category, user.student_id);
+        const customerCategoryId = await updateCustomerCategory(accessToken, membershipObj.category, user.student_id);
 
         const invoiceStatus = SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
 
-        const invoiceResponse = await createInvoice(token, {
+        const invoiceResponse = await createInvoice(accessToken, {
             CustomerId: existingCustomer.id,
             OrderStatus: invoiceStatus,
             DepartmentId: departmentId,
