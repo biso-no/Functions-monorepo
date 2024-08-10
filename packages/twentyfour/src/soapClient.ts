@@ -144,11 +144,11 @@ export const soapClient = () => {
             </UserDefinedDimension>`).join('') || '';
 
         const SOAP_BODY = `<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
-  <soap:Body>
+<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+  <soap12:Body>
     <SaveInvoices xmlns="http://24sevenOffice.com/webservices">
-              <invoices>
-                <InvoiceOrder>
+      <invoices>
+        <InvoiceOrder>
                   <CustomerId>${data.CustomerId}</CustomerId>
                   <OrderStatus>${data.OrderStatus}</OrderStatus>
                   <DateOrdered>${data.DateOrdered}</DateOrdered>
@@ -167,8 +167,8 @@ export const soapClient = () => {
                 </InvoiceOrder>
               </invoices>
             </SaveInvoices>
-          </soap:Body>
-        </soap:Envelope>`;
+          </soap12:Body>
+        </soap12:Envelope>`;
 
         try {
             const response = await axios.post(INVOICE_URL, SOAP_BODY, {
