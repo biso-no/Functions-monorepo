@@ -134,7 +134,7 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
         }
     };
 
-    const createInvoice = async (accessToken: string, data: InvoiceOrder) => {
+    const createInvoice = async (token: string, data: InvoiceOrder) => {
       // Manually concatenate the XML string parts without using template literals
       const invoiceRowsXML = data.InvoiceRows?.map(row => 
           `<InvoiceRow>
@@ -183,7 +183,7 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
           method: 'POST',
           headers: {
               'Content-Type': 'application/soap+xml; charset=utf-8',
-              'Cookie': `ASP_NET.SessionId=${await getAccessToken()}`,
+              'Cookie': 'ASP.NET_SessionId=' + token
           },
           body: SOAP_BODY
       });
