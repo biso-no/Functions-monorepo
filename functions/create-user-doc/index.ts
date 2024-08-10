@@ -1,4 +1,4 @@
-import { createAdminClient, createSessionClient, ID, Query } from "@biso/appwrite";
+import { createAdminClient, createSessionClient, ID, Permission, Query, Role } from "@biso/appwrite";
 
 type Context = {
     req: any;
@@ -20,10 +20,9 @@ export default async ({ req, res, log, error }: Context) => {
 
     log('On User Created POST request');
 
-    const body = JSON.parse(req.body);
-    log('Parsed body: ' + JSON.stringify(body));
-    const { email, $id } = body;
+    log(req.body);
 
+    const { email, $id } = req.body;
     if (!email) {
         log('No userId or email provided');
         return res.json({ error: 'No userId or email provided' });
@@ -39,7 +38,10 @@ export default async ({ req, res, log, error }: Context) => {
 
     const userDoc = await databases.createDocument('app', 'user', $id, {
         email
-    });
+    }, [
+        Permission.update(Role.user($id)),
+        Permission.delete(Role.user($id))
+    ]);
 
     log('Created user document: ' + JSON.stringify(userDoc));
     return res.json({ status: 'ok', exists: false, userDoc });
