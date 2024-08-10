@@ -178,7 +178,6 @@ export const soapClient = () => {
         </soap12:Body>
       </soap12:Envelope>`;
     
-      try {
         // No need to sanitize if SOAP_BODY is constructed properly
         const response = await fetch(INVOICE_URL, {
             method: 'POST',
@@ -189,15 +188,9 @@ export const soapClient = () => {
             body: SOAP_BODY
         });
     
-        return response.json();
-      } catch (error) {
-        return {
-            error: error
-        }
-    }
-  }
-    
-  
+        return response;
+      }
+      
   
     const getCustomerCategories = async (token: string) => {
       try {

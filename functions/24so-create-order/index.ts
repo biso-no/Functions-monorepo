@@ -25,7 +25,6 @@ interface RequestBody {
 const SHOULD_INVOICE = process.env.SHOULD_INVOICE!
 
 export default async ({ req, res, log, error }: Context) => {
-    try {
         log('Parsing request body...');
         log('Request body: ' + JSON.stringify(req.body));
 
@@ -128,12 +127,7 @@ export default async ({ req, res, log, error }: Context) => {
         
         log('Invoice response: ' + JSON.stringify(invoiceResponse));
         return res.json({ temp: 'temp' });
-    } catch (err) {
-        const errorMessage = (err as Error).message;
-        log(`An error occurred: ${errorMessage}`);
-        return res.json({ error: errorMessage });
     }
-};
 
 
 // Utility function to determine department ID based on campus ID
