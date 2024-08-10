@@ -116,7 +116,7 @@ export default async ({ req, res, log, error }: Context) => {
             ],
             InvoiceRows: [
                 {
-                    ProductId: parseInt($id),
+                    ProductId: parseInt(membership_id),
                     Price: paid_amount,
                     Quantity: 1,
                 },
