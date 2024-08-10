@@ -45,6 +45,7 @@ export default async ({ req, res, log, error }: Context) => {
         let existingCustomer: Customer | null = null;
 
         const response = await get(user.student_id);
+        log('Response: ' + JSON.stringify(response));
         if (response.ok) {
             existingCustomer = await response.json() as Customer;
             log(`Existing customer found for user_id: ${user_id} - ${JSON.stringify(existingCustomer)}`);
