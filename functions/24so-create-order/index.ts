@@ -102,6 +102,7 @@ export default async ({ req, res, log, error }: Context) => {
             IncludeVAT: true,
             PaymentAmount: paid_amount,
             PaymentMethodId: 1,
+            PaymentTime: 0,
             UserDefinedDimensions: [
                 {
                     Type: UserDefinedDimensionKey.UserDefined,
