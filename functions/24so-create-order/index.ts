@@ -100,6 +100,7 @@ export default async ({ req, res, log, error }: Context) => {
             OrderStatus: invoiceStatus,
             DepartmentId: departmentId,
             IncludeVAT: true,
+            PaymentAmount: paid_amount,
             PaymentMethodId: 1,
             UserDefinedDimensions: [
                 {

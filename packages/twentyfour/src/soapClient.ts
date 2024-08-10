@@ -21,15 +21,15 @@ interface UserDefinedDimensions {
 }
 
 export enum UserDefinedDimensionKey {
-    None,
-    Department,
-    Employee,
-    Project,
-    Product,
-    Customer,
-    CustomerOrderSlip,
-    SupplierOrderSlip,
-    UserDefined
+    None = 'None',
+    Department = 'Department',
+    Employee = 'Employee',
+    Project = 'Project',
+    Product = 'Product',
+    Customer = 'Customer',
+    CustomerOrderSlip = 'CustomerOrderSlip',
+    SupplierOrderSlip = 'SupplierOrderSlip',
+    UserDefined = 'UserDefined'
 }
 
 interface InvoiceOrder {
@@ -151,11 +151,6 @@ export const soapClient = () => {
         <InvoiceOrder>
                   <CustomerId>${data.CustomerId}</CustomerId>
                   <OrderStatus>${data.OrderStatus}</OrderStatus>
-                  <DateOrdered>${data.DateOrdered}</DateOrdered>
-                  <DateInvoiced>${data.DateInvoiced}</DateInvoiced>
-                  <DateChanged>${data.DateChanged}</DateChanged>
-                  <PaymentTime>${data.PaymentTime}</PaymentTime>
-                  <ProjectId>${data.ProjectId}</ProjectId>
                   <PaymentMethodId>${data.PaymentMethodId}</PaymentMethodId>
                   <PaymentAmount>${data.PaymentAmount}</PaymentAmount>
                   <Distributor>Manual</Distributor>
