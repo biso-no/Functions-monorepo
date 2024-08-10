@@ -174,7 +174,7 @@ export const soapClient = () => {
             const response = await axios.post(INVOICE_URL, SOAP_BODY, {
                 headers: {
                     'Content-Type': 'application/soap+xml; charset=utf-8',
-                    'Authorization': `ASP_NET.SessionId=${accessToken}`
+                    'Cookie': `ASP_NET.SessionId=${accessToken}`
                 }
             });
 
