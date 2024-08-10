@@ -61,7 +61,7 @@ interface InvoiceOrder {
     ReferenceOrderId?: number; 
     ReferenceNumber?: string; 
     InvoiceEmailAddress?: string; 
-    AccrualDate?: Date; 
+    AccrualDate?: string; 
     AccrualLength?: number; 
     InvoiceRows?: InvoiceRow[]; 
     UserDefinedDimensions?: UserDefinedDimensions[]; 
@@ -149,21 +149,25 @@ export const soapClient = () => {
     <SaveInvoices xmlns="http://24sevenOffice.com/webservices">
       <invoices>
         <InvoiceOrder>
-                  <CustomerId>${data.CustomerId}</CustomerId>
-                  <OrderStatus>${data.OrderStatus}</OrderStatus>
-                  <PaymentMethodId>${data.PaymentMethodId}</PaymentMethodId>
-                  <PaymentAmount>${data.PaymentAmount}</PaymentAmount>
-                  <Distributor>Manual</Distributor>
-                  <DepartmentId>${data.DepartmentId}</DepartmentId>
-                  <InvoiceRows>${invoiceRowsXML}</InvoiceRows>
-                  <AccrualDate>${data.AccrualDate}</AccrualDate>
-                  <AccrualLength>${data.AccrualLength}</AccrualLength>
-                  <UserDefinedDimensions>${userDefinedDimensionsXML}</UserDefinedDimensions>
-                </InvoiceOrder>
-              </invoices>
-            </SaveInvoices>
-          </soap12:Body>
-        </soap12:Envelope>`;
+          <CustomerId>${data.CustomerId}</CustomerId>
+          <OrderStatus>${data.OrderStatus}</OrderStatus>
+          <PaymentMethodId>${data.PaymentMethodId}</PaymentMethodId>
+          <PaymentAmount>${data.PaymentAmount}</PaymentAmount>
+          <Distributor>Manual</Distributor>
+          <DepartmentId>${data.DepartmentId}</DepartmentId>
+          <InvoiceRows>
+            ${invoiceRowsXML}
+          </InvoiceRows>
+          <AccrualDate>${data.AccrualDate}</AccrualDate>
+          <AccrualLength>${data.AccrualLength}</AccrualLength>
+          <UserDefinedDimensions>
+            ${userDefinedDimensionsXML}
+          </UserDefinedDimensions>
+        </InvoiceOrder>
+      </invoices>
+    </SaveInvoices>
+  </soap12:Body>
+</soap12:Envelope>`;
 
         try {
             const response = await axios.post(INVOICE_URL, SOAP_BODY, {

@@ -146,7 +146,7 @@ export default async ({ req, res, log, error }: Context) => {
 function determineDepartmentId(campusId: string): number {
     switch (campusId) {
         case '1':
-            return 100;
+            return 1;
         case '2':
             return 300;
         case '3':
@@ -160,11 +160,19 @@ function determineDepartmentId(campusId: string): number {
 
 
 // Utility function to determine accrual date based on current date
-function determineAccrualDate(): Date {
+function determineAccrualDate(): string {
     const currentDate = new Date();
+    let accrualDate: Date;
+
     if (currentDate.getMonth() < 6) {
-        return new Date(currentDate.getFullYear(), 6, 1); // July 1st
+        accrualDate = new Date(currentDate.getFullYear(), 6, 1); // July 1st
     } else {
-        return new Date(currentDate.getFullYear() + 1, 0, 1); // January 1st of the next year
+        accrualDate = new Date(currentDate.getFullYear() + 1, 0, 1); // January 1st of the next year
     }
+
+    const yyyy = accrualDate.getFullYear();
+    const mm = String(accrualDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based, so add 1
+    const dd = String(accrualDate.getDate()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}`;
 }
