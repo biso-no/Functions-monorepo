@@ -189,18 +189,11 @@ export const soapClient = () => {
             body: SOAP_BODY
         });
     
-        const responseText = await response.text();
-        const match = responseText.match(/<InvoiceId>(.*)<\/InvoiceId>/);
-        if (!match) {
-            throw new Error('Invoice ID not found in response');
-        }
-        return {
-            invoiceId: match[1],
-        }
+        return response.json();
       } catch (error) {
         return {
             error: error
-      }
+        }
     }
   }
     

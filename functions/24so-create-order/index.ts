@@ -125,16 +125,9 @@ export default async ({ req, res, log, error }: Context) => {
             AccrualDate: accrualDate,
             AccrualLength: accrualLength,
         });
+        
         log('Invoice response: ' + JSON.stringify(invoiceResponse));
-        if (invoiceResponse.error) {
-            log('Failed to create invoice: ' + invoiceResponse.error);
-            return res.json({ error: 'Failed to create invoice' });
-        }
-
-        const invoiceId = invoiceResponse.invoiceId;
-        log(`Invoice created successfully with ID: ${invoiceId} for user_id: ${user_id}`);
-        return res.json({ invoiceId: invoiceId });
-
+        return res.json({ temp: 'temp' });
     } catch (err) {
         const errorMessage = (err as Error).message;
         log(`An error occurred: ${errorMessage}`);
