@@ -22,28 +22,28 @@ export default async ({ req, res, log, error }: Context) => {
 
     log(req.body);
 
-    const { email, $id } = req.body;
-    if (!email) {
-        log('No userId or email provided');
-        return res.json({ error: 'No userId or email provided' });
-    }
+    const { userId } = req.body;
 
-    const { databases } = await createAdminClient();
+    const { databases, users } = await createAdminClient();
 
-    const existingUser = await databases.getDocument('app', 'user', $id);
+    const existingUser = await databases.getDocument('app', 'user', userId);
     if (existingUser.$id) {
         log('Existing document check complete: ' + JSON.stringify(existingUser));
         return res.json({ status: 'ok', exists: true });
     }
 
-    const userDoc = await databases.createDocument('app', 'user', $id, {
-        email
+    const account = await users.get(userId);
+    if (!account.email) {
+        log('User has no email address');
+        return res.json({ error: 'User has no email address' });
+    }
+
+    const userDoc = await databases.createDocument('app', 'user', userId, {
+        email: account.email
     }, [
-        Permission.update(Role.user($id)),
-        Permission.delete(Role.user($id))
+        Permission.update(Role.user(userId)),
+        Permission.delete(Role.user(userId))
     ]);
-
     log('Created user document: ' + JSON.stringify(userDoc));
-    return res.json({ status: 'ok', exists: false, userDoc });
-
-};
+    return res.json({ status: 'ok', exists: false, userDoc, account });
+}
