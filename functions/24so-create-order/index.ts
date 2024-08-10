@@ -40,6 +40,11 @@ export default async ({ req, res, log, error }: Context) => {
             return res.json({ error: 'Missing required parameters' });
         }
 
+        if (status !== 'SUCCESS') {
+            log('Payment status is not SUCCESS, returning early');
+            return res.json({ error: 'Payment status is not SUCCESS' });
+        }
+
         let existingCustomer: Customer | null = null;
         const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer } = soapClient(log, error);
         const { accessToken, status: tokenStatus } = await getAccessToken();
