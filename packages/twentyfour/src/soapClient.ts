@@ -226,6 +226,7 @@ export const soapClient = () => {
   };
 
   const updateCustomerCategory = async (token: string, customerCategoryId: number, studentId: string) => {
+    
     try {
         const body = `<?xml version="1.0" encoding="utf-8"?>
                     <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
@@ -266,14 +267,16 @@ export const soapClient = () => {
         throw error;
     }
 };
-const getCustomer = async (token: string, customerId: number) => {
+const getCustomer = async (token: string, customerId: string) => {
+    //A student ID looks like this: s1715738. remove the s
+    const studentId = parseInt(customerId.replace('s', ''));
   try {
     const body = `<?xml version="1.0" encoding="utf-8"?>
     <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
       <soap12:Body>
         <GetCompanies xmlns="http://24sevenOffice.com/webservices">
           <searchParams>
-            <CompanyId>${customerId}</CompanyId>
+            <CompanyId>${studentId}</CompanyId>
           </searchParams>
           <returnProperties>
             <string>Name</string>
