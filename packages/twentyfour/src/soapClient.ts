@@ -136,71 +136,70 @@ export const soapClient = () => {
     const createInvoice = async (accessToken: string, data: InvoiceOrder) => {
       // Manually concatenate the XML string parts without using template literals
       const invoiceRowsXML = data.InvoiceRows?.map(row => 
-          '<InvoiceRow>' +
-          '<ProductId>' + (row.ProductId ?? '') + '</ProductId>' +
-          '<Price>' + (row.Price ?? '') + '</Price>' +
-          '<Quantity>' + (row.Quantity ?? '') + '</Quantity>' +
-          '</InvoiceRow>'
+          `<InvoiceRow>
+            <ProductId>${row.ProductId ?? ''}</ProductId>
+            <Price>${row.Price ?? ''}</Price>
+            <Quantity>${row.Quantity ?? ''}</Quantity>
+          </InvoiceRow>`
       ).join('') || '';
-  
+    
       const userDefinedDimensionsXML = data.UserDefinedDimensions?.map(udd => 
-          '<UserDefinedDimension>' +
-          '<Type>' + udd.Type + '</Type>' +
-          '<Name>' + udd.Name + '</Name>' +
-          '<TypeId>' + udd.TypeId + '</TypeId>' +
-          '</UserDefinedDimension>'
+          `<UserDefinedDimension>
+            <Type>${udd.Type}</Type>
+            <Name>${udd.Name}</Name>
+            <TypeId>${udd.TypeId}</TypeId>
+          </UserDefinedDimension>`
       ).join('') || '';
-  
-      const SOAP_BODY = '<?xml version="1.0" encoding="utf-8"?>' +
-      '<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ' +
-      'xmlns:xsd="http://www.w3.org/2001/XMLSchema" ' +
-      'xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">' +
-      '<soap12:Body>' +
-      '<SaveInvoices xmlns="http://24sevenOffice.com/webservices">' +
-      '<invoices>' +
-      '<InvoiceOrder>' +
-      '<CustomerId>' + data.CustomerId + '</CustomerId>' +
-      '<OrderStatus>' + data.OrderStatus + '</OrderStatus>' +
-      '<PaymentMethodId>' + data.PaymentMethodId + '</PaymentMethodId>' +
-      '<PaymentAmount>' + data.PaymentAmount + '</PaymentAmount>' +
-      '<Distributor>Manual</Distributor>' +
-      '<DepartmentId>' + data.DepartmentId + '</DepartmentId>' +
-      '<InvoiceRows>' + invoiceRowsXML + '</InvoiceRows>' +
-      '<AccrualDate>' + data.AccrualDate + '</AccrualDate>' +
-      '<AccrualLength>' + data.AccrualLength + '</AccrualLength>' +
-      '<UserDefinedDimensions>' + userDefinedDimensionsXML + '</UserDefinedDimensions>' +
-      '</InvoiceOrder>' +
-      '</invoices>' +
-      '</SaveInvoices>' +
-      '</soap12:Body>' +
-      '</soap12:Envelope>';
-  
+    
+      const SOAP_BODY = `<?xml version="1.0" encoding="utf-8"?>
+      <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                       xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+        <soap12:Body>
+          <SaveInvoices xmlns="http://24sevenOffice.com/webservices">
+            <invoices>
+              <InvoiceOrder>
+                <CustomerId>${data.CustomerId}</CustomerId>
+                <OrderStatus>${data.OrderStatus}</OrderStatus>
+                <PaymentMethodId>${data.PaymentMethodId}</PaymentMethodId>
+                <PaymentAmount>${data.PaymentAmount}</PaymentAmount>
+                <Distributor>Manual</Distributor>
+                <DepartmentId>${data.DepartmentId}</DepartmentId>
+                <InvoiceRows>${invoiceRowsXML}</InvoiceRows>
+                <AccrualDate>${data.AccrualDate}</AccrualDate>
+                <AccrualLength>${data.AccrualLength}</AccrualLength>
+                <UserDefinedDimensions>${userDefinedDimensionsXML}</UserDefinedDimensions>
+              </InvoiceOrder>
+            </invoices>
+          </SaveInvoices>
+        </soap12:Body>
+      </soap12:Envelope>`;
+    
       try {
-          // Ensure the SOAP_BODY does not contain unexpected backslashes or line breaks
-          const sanitizedSoapBody = SOAP_BODY.replace(/\\n/g, '').replace(/\\"/g, '"');
-  
-          const response = await axios.post(INVOICE_URL, sanitizedSoapBody, {
-              headers: {
-                  'Content-Type': 'application/soap+xml; charset=utf-8',
-                  'Cookie': `ASP_NET.SessionId=${accessToken}`
-              }
-          });
-  
-          if (response.status !== 200) {
-              throw new Error('Failed to create invoice');
-          }
-  
-          const responseText = response.data;
-          const match = responseText.match(/<InvoiceId>(.*)<\/InvoiceId>/);
-          if (!match) {
-              throw new Error('Invoice ID not found in response');
-          }
-          return match[1];
+        // No need to sanitize if SOAP_BODY is constructed properly
+        const response = await axios.post(INVOICE_URL, SOAP_BODY, {
+            headers: {
+                'Content-Type': 'application/soap+xml; charset=utf-8',
+                'Cookie': `ASP_NET.SessionId=${accessToken}`
+            }
+        });
+    
+        if (response.status !== 200) {
+            throw new Error('Failed to create invoice');
+        }
+    
+        const responseText = response.data;
+        const match = responseText.match(/<InvoiceId>(.*)<\/InvoiceId>/);
+        if (!match) {
+            throw new Error('Invoice ID not found in response');
+        }
+        return match[1];
       } catch (error) {
-          console.error('Error during invoice creation:', error);
-          throw error;
+        console.error('Error during invoice creation:', error);
+        throw error;
       }
-  };
+    };
+    
   
   
     const getCustomerCategories = async (token: string) => {
