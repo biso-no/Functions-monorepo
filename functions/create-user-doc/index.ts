@@ -21,30 +21,26 @@ export default async ({ req, res, log, error }: Context) => {
     log('On User Created POST request');
 
     const body = JSON.parse(req.body);
-    const { email } = body;
+    const { email, $id } = body;
 
     if (!email) {
         log('No userId or email provided');
         return res.json({ error: 'No userId or email provided' });
     }
 
-    const { databases, account } = await createSessionClient(req.headers['x-appwrite-user-jwt'] as string);
-    const user = await account.get();
+    const { databases } = await createAdminClient();
 
-    let existingDoc;
-    try {
-        existingDoc = await databases.getDocument('app', 'user', user.$id);
-        if (existingDoc) {
-            log('Existing document check complete: ' + JSON.stringify(existingDoc));
-            return res.json({ status: 'ok', exists: true });
-        }
-    } catch (e) {
-        log('No existing document found, proceeding to create one.');
-        const userDoc = await databases.createDocument('app', 'user', user.$id, {
-            email
-        });
-
-        log('Created user document: ' + JSON.stringify(userDoc));
-        return res.json({ status: 'ok', exists: false, userDoc });
+    const existingUser = await databases.getDocument('app', 'user', $id);
+    if (existingUser.$id) {
+        log('Existing document check complete: ' + JSON.stringify(existingUser));
+        return res.json({ status: 'ok', exists: true });
     }
+
+    const userDoc = await databases.createDocument('app', 'user', $id, {
+        email
+    });
+
+    log('Created user document: ' + JSON.stringify(userDoc));
+    return res.json({ status: 'ok', exists: false, userDoc });
+
 };
