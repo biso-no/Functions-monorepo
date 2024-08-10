@@ -69,7 +69,7 @@ export default async ({ req, res, log, error }: Context) => {
 
         const departmentId = determineDepartmentId(user.campus.$id);
         const accrualDate = determineAccrualDate();
-        const accrualLength = 6;
+
 
         // Check if membership is a string and parse it, otherwise assume it's already an object
         let membershipObj: any;
@@ -93,6 +93,7 @@ export default async ({ req, res, log, error }: Context) => {
         const customerCategoryId = await updateCustomerCategory(accessToken, membershipObj.category, studentId);
 
         const invoiceStatus = SHOULD_INVOICE === 'true' ? 'Invoiced' : 'Draft';
+        const accrualLength = determineAccrualLength(membershipObj.type);
 
         const invoiceResponse = await createInvoice(accessToken, {
             CustomerId: studentId,
@@ -147,15 +148,15 @@ function determineDepartmentId(campusId: string): number {
 }
 
 
-// Utility function to determine accrual date based on current date
 function determineAccrualDate(): string {
     const currentDate = new Date();
     let accrualDate: Date;
 
-    if (currentDate.getMonth() < 6) {
-        accrualDate = new Date(currentDate.getFullYear(), 6, 1); // July 1st
-    } else {
-        accrualDate = new Date(currentDate.getFullYear() + 1, 0, 1); // January 1st of the next year
+    // Determine the accrual date based on the purchase time of the year
+    if (currentDate.getMonth() >= 6) { // July or later (fall)
+        accrualDate = new Date(currentDate.getFullYear() + 1, 6, 1); // July 1st of next year
+    } else { // January through June
+        accrualDate = new Date(currentDate.getFullYear(), 0, 1); // January 1st of this year
     }
 
     const yyyy = accrualDate.getFullYear();
@@ -163,4 +164,18 @@ function determineAccrualDate(): string {
     const dd = String(accrualDate.getDate()).padStart(2, '0');
 
     return `${yyyy}-${mm}-${dd}`;
+}
+
+// Utility function to determine accrual length based on membership type
+function determineAccrualLength(membershipType: string): number {
+    switch (membershipType.toLowerCase()) {
+        case 'semester':
+            return 6; // 6 months
+        case 'year':
+            return 12; // 12 months
+        case '3 years':
+            return 36; // 36 months
+        default:
+            throw new Error('Invalid membership type');
+    }
 }

@@ -179,17 +179,15 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
       </soap12:Envelope>`;
     
         // No need to sanitize if SOAP_BODY is constructed properly
-        const response = await fetch(INVOICE_URL, {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/soap+xml; charset=utf-8',
-              'Cookie': 'ASP.NET_SessionId=' + token
-          },
-          body: SOAP_BODY
-      });
+        const response = await axios.post(INVOICE_URL, SOAP_BODY, {
+            headers: {
+                'Content-Type': 'application/soap+xml; charset=utf-8',
+                'Cookie': 'ASP.NET_SessionId=' + token
+            }
+        });
       
       
-      const responseText = await response.text();
+      const responseText = await response.data;
       log('Invoice response status: ' + response.status);
       log('Invoice response headers: ' + JSON.stringify(response.headers));
       log('Invoice response body: ' + responseText);
