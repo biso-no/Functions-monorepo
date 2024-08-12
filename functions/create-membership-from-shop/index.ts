@@ -83,7 +83,7 @@ export default async ({ req, res, log, error }: Context) => {
             const membershipType = campusMapping[selected_variation].type;
             const status = "Mottatt";
             await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, log, error);
-            return res.status(404).json({ error: 'Customer not found and creation is disabled' });
+            return res.json({ error: 'Customer not found and creation is disabled' });
         }
 
         const campus = determineCampusId(selected_variation);
@@ -175,7 +175,7 @@ export default async ({ req, res, log, error }: Context) => {
         return res.json({ success: 'Process completed successfully' });
     } catch (err) {
         error(`Unexpected error: ${err instanceof Error ? err.message : 'Unknown error'}`);
-        return res.status(500).json({ error: 'An unexpected error occurred' });
+        return res.json({ error: 'An unexpected error occurred' });
     }
 };
 
