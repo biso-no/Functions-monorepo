@@ -1,6 +1,11 @@
 import { Models } from "@biso/appwrite";
 import { Customer, customer, salesOrder, Status, soapClient, UserDefinedDimensionKey } from "@biso/twentyfour";
-import {phpUnserialize} from 'phpunserialize'; // Assuming you have a package like `phpunserialize` to parse the PHP serialized strings.
+//Ignore type error below
+
+// @ts-ignore
+import PHPUnserialize from 'php-unserialize'; // Assuming you have a package like `phpunserialize` to parse the PHP serialized strings.
+
+
 
 type Context = {
     req: any;
@@ -30,7 +35,7 @@ export default async ({ req, res, log, error }: Context) => {
         // Extracting student_id from custom_field_value
         let student_id = '';
         try {
-            const parsedValue = phpUnserialize(custom_field_value); // Use phpUnserialize to parse the PHP serialized string
+            const parsedValue = PHPUnserialize.phpUnserialize(custom_field_value); // Use phpUnserialize to parse the PHP serialized string
             if (typeof parsedValue === 'object' && parsedValue !== null && 'fields' in parsedValue) {
                 student_id = parsedValue.fields[0].value;
             } else {
