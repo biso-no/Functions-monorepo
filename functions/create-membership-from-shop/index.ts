@@ -71,7 +71,12 @@ export default async ({ req, res, log, error }: Context) => {
             log(`New customer created with ID: ${existingCustomer.Id} for user_id: ${studentId}`);
         } 
         if (!SHOULD_CREATE_CUSTOMER && !existingCustomer) {
+            const parsedCustomer = JSON.parse(customer);
             log(`Customer not found for user_id: ${student_id}, and SHOULD_CREATE_CUSTOMER is false. Exiting early...`);
+            //Get the name of the membership type based on the selected_variation
+            const membershipType = campusMapping[selected_variation].type;
+            const status = "Mottatt";
+            await sendStatusUpdateToSharepoint(studentId, parsedCustomer.name, membershipType.toString(), status, log, error);
             return res.status(404).json({ error: 'Customer not found and creation is disabled' });
         }
 
@@ -167,6 +172,13 @@ export default async ({ req, res, log, error }: Context) => {
         });
         
         log('Invoice response: ' + JSON.stringify(invoiceResponse));
+        if (invoiceResponse && existingCustomer && membershipObj) {
+            const name = existingCustomer.Name;
+            const membershipType = membershipObj.category;
+            const status = "Ferdig";
+
+            await sendStatusUpdateToSharepoint(studentId, name, membershipType.toString(), status, log, error);
+        }
         return res.json({ temp: 'temp' });
     }
 
@@ -240,3 +252,28 @@ function determineCampusId(selected_variation: string): { campus_id: string, nam
     return { campus_id: campus.campus_id, name: campus.name };
 }
 
+async function sendStatusUpdateToSharepoint(studentId: number, name: string, membershipType: string, status: string, log: (msg: any) => void, error: (msg: any) => void) {
+    try {
+        const response = await fetch("https://example.com/status-update-endpoint", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                studentId,
+                name,
+                membershipType,
+                status,
+            }),
+        });
+
+        const data = await response.json();
+        log(`Status update sent successfully: ${JSON.stringify(data)}`);
+    } catch (err) {
+        if (err instanceof Error) {
+            error(`Failed to send status update: ${err.message}`);
+        } else {
+            error('Failed to send status update: An unknown error occurred');
+        }
+    }
+}
