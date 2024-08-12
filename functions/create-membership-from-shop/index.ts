@@ -1,11 +1,5 @@
 import { Models } from "@biso/appwrite";
 import { Customer, customer, salesOrder, Status, soapClient, UserDefinedDimensionKey } from "@biso/twentyfour";
-//Ignore type error below
-
-// @ts-ignore
-import PHPUnserialize from 'php-unserialize'; // Assuming you have a package like `phpunserialize` to parse the PHP serialized strings.
-
-
 
 type Context = {
     req: any;
@@ -32,21 +26,22 @@ export default async ({ req, res, log, error }: Context) => {
         const body = req.body as RequestBody;
         const { customer, custom_field_value, selected_variation, price } = body;
 
-        // Extracting student_id from custom_field_value
+        // Manually extracting student_id from custom_field_value
         let student_id = '';
         try {
-            const parsedValue = PHPUnserialize.phpUnserialize(custom_field_value); // Use phpUnserialize to parse the PHP serialized string
-            if (typeof parsedValue === 'object' && parsedValue !== null && 'fields' in parsedValue) {
-                student_id = parsedValue.fields[0].value;
+            const match = custom_field_value.match(/s:\d+:"S(\d+)"/);
+            if (match && match[1]) {
+                student_id = match[1];
             } else {
                 throw new Error('Invalid format');
             }
-        } catch (parseError) {
-            error('Error parsing custom_field_value: ' + parseError);
+        } catch (err) {
+            const parseError = err as Error;
+            error('Error parsing custom_field_value: ' + parseError.message);
             return res.json({ error: 'Invalid custom_field_value format' });
         }
 
-        log(`Parsed request body: ${JSON.stringify(body)}`);
+        log(`Parsed student_id: ${student_id}`);
 
         if (!customer || !student_id || !selected_variation) {
             error('Missing required parameters: customer, student_id, or selected_variation');
@@ -64,7 +59,7 @@ export default async ({ req, res, log, error }: Context) => {
         }
         log('Token response: ' + JSON.stringify(accessToken));
 
-        const studentId = parseInt(student_id.replace('s', ''), 10);
+        const studentId = parseInt(student_id, 10);
         let response;
         try {
             response = await getCustomer(accessToken, studentId);
