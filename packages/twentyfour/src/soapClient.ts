@@ -319,7 +319,7 @@ const getCustomer = async (token: string, customerId: number) => {
 
 
 
-const createCustomer = async (token: string, user: Models.Document) => {
+const createCustomer = async (token: string, user: Partial<Models.Document>) => {
 
   const studentId = parseInt(user.student_id.replace('s', ''));
   try {
