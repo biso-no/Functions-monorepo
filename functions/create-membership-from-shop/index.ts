@@ -51,6 +51,9 @@ export default async ({ req, res, log, error }: Context) => {
             log('Response: ' + JSON.stringify(response));
         } catch (err) {
             error(`Error during customer retrieval: ${err}`);
+            const membershipType = campusMapping[selected_variation].type;
+            const status = "Mottatt";
+            await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, log, error);
             return res.json({ error: 'Failed to retrieve customer' });
         }
 
