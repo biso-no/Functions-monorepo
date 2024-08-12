@@ -1,5 +1,6 @@
 import { Models } from "@biso/appwrite";
 import { Customer, customer, salesOrder, Status, soapClient, UserDefinedDimensionKey } from "@biso/twentyfour";
+import {phpUnserialize} from 'phpunserialize'; // Assuming you have a package like `phpunserialize` to parse the PHP serialized strings.
 
 type Context = {
     req: any;
@@ -29,8 +30,12 @@ export default async ({ req, res, log, error }: Context) => {
         // Extracting student_id from custom_field_value
         let student_id = '';
         try {
-            const parsedValue = JSON.parse(custom_field_value);
-            student_id = parsedValue?.fields?.[0]?.value ?? '';
+            const parsedValue = phpUnserialize(custom_field_value); // Use phpUnserialize to parse the PHP serialized string
+            if (typeof parsedValue === 'object' && parsedValue !== null && 'fields' in parsedValue) {
+                student_id = parsedValue.fields[0].value;
+            } else {
+                throw new Error('Invalid format');
+            }
         } catch (parseError) {
             error('Error parsing custom_field_value: ' + parseError);
             return res.json({ error: 'Invalid custom_field_value format' });
@@ -62,8 +67,9 @@ export default async ({ req, res, log, error }: Context) => {
         } catch (err) {
             error(`Error during customer retrieval: ${err}`);
             const membershipType = campusMapping[selected_variation].type;
+            const campusName = campusMapping[selected_variation].name;
             const status = "Mottatt";
-            await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, log, error);
+            await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, campusName, log, error);
             return res.json({ error: 'Failed to retrieve customer' });
         }
 
@@ -91,8 +97,9 @@ export default async ({ req, res, log, error }: Context) => {
         if (!shouldCreateCustomer && !existingCustomer) {
             log(`Customer not found for user_id: ${student_id}, and SHOULD_CREATE_CUSTOMER is false. Exiting early...`);
             const membershipType = campusMapping[selected_variation].type;
+            const campusName = campusMapping[selected_variation].name;
             const status = "Mottatt";
-            await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, log, error);
+            await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, campusName, log, error);
             return res.json({ error: 'Customer not found and creation is disabled' });
         }
 
@@ -178,9 +185,10 @@ export default async ({ req, res, log, error }: Context) => {
         if (invoiceResponse && existingCustomer && membershipObj) {
             const name = existingCustomer.Name;
             const membershipType = membershipObj.category;
+            const campusName = campusMapping[selected_variation].name;
             const status = "Ferdig";
 
-            await sendStatusUpdateToSharepoint(studentId, name, membershipType.toString(), status, log, error);
+            await sendStatusUpdateToSharepoint(studentId, name, membershipType.toString(), status, campusName, log, error);
         }
         return res.json({ success: 'Process completed successfully' });
     } catch (err) {
@@ -188,6 +196,7 @@ export default async ({ req, res, log, error }: Context) => {
         return res.json({ error: 'An unexpected error occurred' });
     }
 };
+
 
 // Utility function to determine department ID based on campus ID
 function determineDepartmentId(campusId: string): number {
@@ -204,7 +213,6 @@ function determineDepartmentId(campusId: string): number {
             return 1000; // Default to National
     }
 }
-
 
 function determineAccrualDate(): string {
     const currentDate = new Date();
@@ -258,7 +266,7 @@ function determineCampusId(selected_variation: string): { campus_id: string, nam
     return { campus_id: campus.campus_id, name: campus.name };
 }
 
-async function sendStatusUpdateToSharepoint(studentId: number, name: string, membershipType: string, status: string, log: (msg: any) => void, error: (msg: any) => void) {
+async function sendStatusUpdateToSharepoint(studentId: number, name: string, membershipType: string, status: string, campusName: string, log: (msg: any) => void, error: (msg: any) => void) {
     try {
         const response = await fetch(`https://prod-62.westeurope.logic.azure.com:443/workflows/0292362fa91b46ef9d59267886f6a3a4/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J3pmj_cNjprnZeK9KJop0UjD9lcPms_L6Olz4OTDch4`, {
             method: "POST",
@@ -270,6 +278,7 @@ async function sendStatusUpdateToSharepoint(studentId: number, name: string, mem
                 name,
                 membershipType,
                 status,
+                campusName, // Including the campus name in the request body
             }),
         });
 
