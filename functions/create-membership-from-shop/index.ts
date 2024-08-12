@@ -24,7 +24,17 @@ export default async ({ req, res, log, error }: Context) => {
         log('Request body: ' + JSON.stringify(req.body));
 
         const body = req.body as RequestBody;
-        const { customer, custom_field_value: student_id, selected_variation, price } = body;
+        const { customer, custom_field_value, selected_variation, price } = body;
+
+        // Extracting student_id from custom_field_value
+        let student_id = '';
+        try {
+            const parsedValue = JSON.parse(custom_field_value);
+            student_id = parsedValue?.fields?.[0]?.value ?? '';
+        } catch (parseError) {
+            error('Error parsing custom_field_value: ' + parseError);
+            return res.json({ error: 'Invalid custom_field_value format' });
+        }
 
         log(`Parsed request body: ${JSON.stringify(body)}`);
 
@@ -44,7 +54,7 @@ export default async ({ req, res, log, error }: Context) => {
         }
         log('Token response: ' + JSON.stringify(accessToken));
 
-        const studentId = parseInt(student_id.replace('s', ''));
+        const studentId = parseInt(student_id.replace('s', ''), 10);
         let response;
         try {
             response = await getCustomer(accessToken, studentId);
@@ -178,7 +188,6 @@ export default async ({ req, res, log, error }: Context) => {
         return res.json({ error: 'An unexpected error occurred' });
     }
 };
-
 
 // Utility function to determine department ID based on campus ID
 function determineDepartmentId(campusId: string): number {
