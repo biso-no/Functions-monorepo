@@ -198,7 +198,6 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
         return responseText;
       } catch (error) {
         log('Error during invoice creation: ' + error);
-        throw error;
       }
     };
       
