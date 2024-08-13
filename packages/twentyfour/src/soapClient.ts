@@ -42,7 +42,7 @@ interface InvoiceOrder {
     DeliveryAlternative?: string; 
     InvoiceId?: number; 
     DateOrdered?: Date; 
-    DateInvoiced?: Date; 
+    DateInvoiced?: string; 
     DateChanged?: Date; 
     OrderStatus?: string;
     PaymentTime?: number; 

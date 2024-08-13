@@ -126,6 +126,9 @@ export default async ({ req, res, log, error }: Context) => {
             name: campusMapping[selected_variation].name,
         };
 
+        //Current date in format YYYY-MM-DD
+        const currentDate = new Date().toISOString().split('T')[0];
+
         let invoiceResponse;
         if (existingCustomer && membershipObj) {
         try {
@@ -135,7 +138,7 @@ export default async ({ req, res, log, error }: Context) => {
                 DepartmentId: departmentId,
                 IncludeVAT: true,
                 PaymentAmount: parseFloat(price),
-                DateInvoiced: new Date().toISOString(),
+                DateInvoiced: currentDate,
                 PaymentMethodId: 1,
                 PaymentTime: 0,
                 UserDefinedDimensions: [
