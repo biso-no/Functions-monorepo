@@ -101,20 +101,6 @@ export default async ({ req, res, log, error }: Context) => {
         const departmentId = determineDepartmentId(campus.campus_id);
         const accrualDate = determineAccrualDate();
 
-        const categoryMapping: { [key: string]: number } = {
-            '22141': 113170, // Semester
-            '22142': 113170,
-            '22143': 113170,
-            '22144': 113170,
-            '22145': 113172, // 2 years
-            '22146': 113172,
-            '22147': 113172,
-            '22148': 113172,
-            '22149': 113171, // 3 years
-            '22150': 113171,
-            '22151': 113171,
-            '22152': 113171,
-        };
 
         const membershipObj = {
             customerId: existingCustomer?.Id || studentId,
@@ -244,39 +230,10 @@ function determineAccrualDate(): string {
     return `${yyyy}-${mm}-${dd}`;
 }
 
-// Utility function to determine accrual length based on membership type
-function determineAccrualLength(membershipType: string): number {
-    switch (membershipType.toLowerCase()) {
-        case 'semester':
-            return 6; // 6 months
-        case 'year':
-            return 12; // 12 months
-        case '3 years':
-            return 36; // 36 months
-        default:
-            throw new Error('Invalid membership type');
-    }
-}
 
-const campusMapping: { [key: string]: { campus_id: string, name: string, type: string } } = {
-    '22141': { campus_id: '1', name: 'Oslo', type: 'Semester' },
-    '22145': { campus_id: '1', name: 'Oslo', type: 'Year' },
-    '22149': { campus_id: '1', name: 'Oslo', type: '3 Years' },
-    '22142': { campus_id: '2', name: 'Bergen', type: 'Semester' },
-    '22146': { campus_id: '2', name: 'Bergen', type: 'Year' },
-    '22150': { campus_id: '2', name: 'Bergen', type: '3 Years' },
-    '22143': { campus_id: '3', name: 'Trondheim', type: 'Semester' },
-    '22147': { campus_id: '3', name: 'Trondheim', type: 'Year' },
-    '22151': { campus_id: '3', name: 'Trondheim', type: '3 Years' },
-    '22144': { campus_id: '4', name: 'Stavanger', type: 'Semester' },
-    '22148': { campus_id: '4', name: 'Stavanger', type: 'Year' },
-    '22152': { campus_id: '4', name: 'Stavanger', type: '3 Years' },
-};
 
-function determineCampusId(selected_variation: string): { campus_id: string, name: string } {
-    const campus = campusMapping[selected_variation];
-    return { campus_id: campus.campus_id, name: campus.name };
-}
+
+
 
 async function sendStatusUpdateToSharepoint(studentId: number, name: string, membershipType: string, status: string, campusName: string, log: (msg: any) => void, error: (msg: any) => void) {
     try {
@@ -306,3 +263,54 @@ async function sendStatusUpdateToSharepoint(studentId: number, name: string, mem
         }
     }
 }
+
+
+const campusMapping: { [key: string]: { campus_id: string, name: string, type: string } } = {
+    '22141': { campus_id: '1', name: 'Oslo', type: 'Semester' },
+    '22145': { campus_id: '1', name: 'Oslo', type: 'Year' },
+    '22149': { campus_id: '1', name: 'Oslo', type: '3 Years' },
+    '22142': { campus_id: '2', name: 'Bergen', type: 'Semester' },
+    '22146': { campus_id: '2', name: 'Bergen', type: 'Year' },
+    '22150': { campus_id: '2', name: 'Bergen', type: '3 Years' },
+    '22143': { campus_id: '3', name: 'Trondheim', type: 'Semester' },
+    '22147': { campus_id: '3', name: 'Trondheim', type: 'Year' },
+    '22151': { campus_id: '3', name: 'Trondheim', type: '3 Years' },
+    '22144': { campus_id: '4', name: 'Stavanger', type: 'Semester' },
+    '22148': { campus_id: '4', name: 'Stavanger', type: 'Year' },
+    '22152': { campus_id: '4', name: 'Stavanger', type: '3 Years' },
+};
+
+
+// Utility function to determine accrual length based on membership type
+function determineAccrualLength(membershipType: string): number {
+    switch (membershipType.toLowerCase()) {
+        case 'semester':
+            return 6; // 6 months
+        case 'year':
+            return 12; // 12 months
+        case '3 years':
+            return 36; // 36 months
+        default:
+            throw new Error('Invalid membership type');
+    }
+}
+
+function determineCampusId(selected_variation: string): { campus_id: string, name: string } {
+    const campus = campusMapping[selected_variation];
+    return { campus_id: campus.campus_id, name: campus.name };
+}
+
+const categoryMapping: { [key: string]: number } = {
+    '22141': 113170, // Semester
+    '22142': 113170,
+    '22143': 113170,
+    '22144': 113170,
+    '22145': 113172, // 2 years
+    '22146': 113172,
+    '22147': 113172,
+    '22148': 113172,
+    '22149': 113171, // 3 years
+    '22150': 113171,
+    '22151': 113171,
+    '22152': 113171,
+};
