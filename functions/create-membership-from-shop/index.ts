@@ -171,7 +171,7 @@ export default async ({ req, res, log, error }: Context) => {
         } catch (err) {
             error('Error creating invoice: ' + err);
             const name = existingCustomer.Name;
-            const membershipType = membershipObj.category;
+            const membershipType = campusMapping[selected_variation].type;
             const campusName = campusMapping[selected_variation].name;
             const status = "Faktura feilet";
             log('Sending status update to Sharepoint for failed process...');
@@ -183,7 +183,7 @@ export default async ({ req, res, log, error }: Context) => {
 
         if (invoiceResponse && existingCustomer && membershipObj) {
             const name = existingCustomer.Name;
-            const membershipType = membershipObj.category;
+            const membershipType = campusMapping[selected_variation].type;
             const campusName = campusMapping[selected_variation].name;
             const status = "Faktura opprettet";
 
