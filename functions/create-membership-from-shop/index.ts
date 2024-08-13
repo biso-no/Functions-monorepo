@@ -35,6 +35,7 @@ export default async ({ req, res, log, error }: Context) => {
         let existingCustomer: Customer | null = null;
         const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer } = soapClient(log, error);
 
+        log('Attempting to retrieve access token...');
         const { accessToken, status: tokenStatus } = await getAccessToken();
         if (tokenStatus !== 'ok') {
             log('Failed to retrieve access token');
@@ -49,8 +50,10 @@ export default async ({ req, res, log, error }: Context) => {
             error('Invalid student number format');
             return res.json({ error: 'Invalid student number format' });
         }
+        
         let response;
         try {
+            log(`Attempting to retrieve customer with studentId: ${studentId}`);
             response = await getCustomer(accessToken, studentId);
             log('Response: ' + JSON.stringify(response));
         } catch (err) {
@@ -58,6 +61,7 @@ export default async ({ req, res, log, error }: Context) => {
             const membershipType = campusMapping[selected_variation].type;
             const campusName = campusMapping[selected_variation].name;
             const status = "Mottatt";
+            log('Sending status update to Sharepoint due to customer retrieval failure...');
             await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, campusName, log, error);
             return res.json({ error: 'Failed to retrieve customer' });
         }
@@ -87,10 +91,12 @@ export default async ({ req, res, log, error }: Context) => {
             const membershipType = campusMapping[selected_variation].type;
             const campusName = campusMapping[selected_variation].name;
             const status = "Mottatt";
+            log('Sending status update to Sharepoint because customer creation is disabled...');
             await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, campusName, log, error);
             return res.json({ error: 'Customer not found and creation is disabled' });
         }
 
+        log('Customer found or created successfully, proceeding to update customer category...');
         const campus = determineCampusId(selected_variation);
         const departmentId = determineDepartmentId(campus.campus_id);
         const accrualDate = determineAccrualDate();
@@ -118,9 +124,11 @@ export default async ({ req, res, log, error }: Context) => {
         };
 
         try {
+            log('Attempting to update customer category...');
             await updateCustomerCategory(accessToken, membershipObj.category, studentId);
+            log('Customer category updated successfully');
         } catch (err) {
-            log('Error updating customer category');
+            error('Error updating customer category: ' + err);
             return res.json({ error: 'Failed to update customer category' });
         }
 
@@ -134,6 +142,7 @@ export default async ({ req, res, log, error }: Context) => {
 
         let invoiceResponse;
         try {
+            log(`Attempting to create invoice for customerId: ${studentId}...`);
             invoiceResponse = await createInvoice(accessToken, {
                 CustomerId: studentId,
                 OrderStatus: invoiceStatus,
@@ -164,9 +173,9 @@ export default async ({ req, res, log, error }: Context) => {
                 AccrualDate: accrualDate,
                 AccrualLength: accrualLength,
             });
-            log('Invoice response: ' + JSON.stringify(invoiceResponse));
+            log('Invoice created successfully: ' + JSON.stringify(invoiceResponse));
         } catch (err) {
-            log('Error creating invoice');
+            error('Error creating invoice: ' + err);
             return res.json({ error: 'Failed to create invoice' });
         }
 
@@ -176,14 +185,18 @@ export default async ({ req, res, log, error }: Context) => {
             const campusName = campusMapping[selected_variation].name;
             const status = "Ferdig";
 
+            log('Sending status update to Sharepoint for completed process...');
             await sendStatusUpdateToSharepoint(studentId, name, membershipType.toString(), status, campusName, log, error);
+            log('Status update sent successfully');
         }
+
         return res.json({ success: 'Process completed successfully' });
     } catch (err) {
         error(`Unexpected error: ${err instanceof Error ? err.message : 'Unknown error'}`);
         return res.json({ error: 'An unexpected error occurred' });
     }
 };
+
 
 // Utility function to determine department ID based on campus ID
 function determineDepartmentId(campusId: string): number {
