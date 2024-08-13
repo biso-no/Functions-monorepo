@@ -180,6 +180,7 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
     
         // No need to sanitize if SOAP_BODY is constructed properly
         log('Invoice request body: ' + SOAP_BODY);
+        try {
         const response = await axios.post(INVOICE_URL, SOAP_BODY, {
             headers: {
                 'Content-Type': 'application/soap+xml; charset=utf-8',
@@ -195,7 +196,11 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
       
     
         return responseText;
+      } catch (error) {
+        log('Error during invoice creation: ' + error);
+        throw error;
       }
+    };
       
   
     const getCustomerCategories = async (token: string) => {
