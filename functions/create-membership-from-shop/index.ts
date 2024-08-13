@@ -249,18 +249,20 @@ function determineCampusId(selected_variation: string): { campus_id: string, nam
 
 async function sendStatusUpdateToSharepoint(studentId: number, name: string, membershipType: string, status: string, campusName: string, log: (msg: any) => void, error: (msg: any) => void) {
     try {
+        const body = {
+            studentId,
+            name,
+            membershipType,
+            status,
+            campusName, // Including the campus name in the request body
+        };
+        log(`Sending status update to Sharepoint: ${JSON.stringify(body)}`);
         const response = await fetch(`https://prod-62.westeurope.logic.azure.com:443/workflows/0292362fa91b46ef9d59267886f6a3a4/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=J3pmj_cNjprnZeK9KJop0UjD9lcPms_L6Olz4OTDch4`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                studentId,
-                name,
-                membershipType,
-                status,
-                campusName, // Including the campus name in the request body
-            }),
+            body: JSON.stringify(body),
         });
 
         const data = await response.json();
