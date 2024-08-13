@@ -151,7 +151,7 @@ export default async ({ req, res, log, error }: Context) => {
                 ],
                 InvoiceRows: [
                     {
-                        ProductId: parseInt(membershipObj.membershipId),
+                        ProductId: parseInt(variationToProductIdMapping[selected_variation]),
                         Price: parseFloat(price),
                         Quantity: 1,
                     },
@@ -313,4 +313,34 @@ const categoryMapping: { [key: string]: number } = {
     '22150': 113171,
     '22151': 113171,
     '22152': 113171,
+};
+
+/*
+    '22141': { campus_id: '1', name: 'Oslo', type: 'Semester' },
+    '22145': { campus_id: '1', name: 'Oslo', type: 'Year' },
+    '22149': { campus_id: '1', name: 'Oslo', type: '3 Years' },
+    '22142': { campus_id: '2', name: 'Bergen', type: 'Semester' },
+    '22146': { campus_id: '2', name: 'Bergen', type: 'Year' },
+    '22150': { campus_id: '2', name: 'Bergen', type: '3 Years' },
+    '22143': { campus_id: '3', name: 'Trondheim', type: 'Semester' },
+    '22147': { campus_id: '3', name: 'Trondheim', type: 'Year' },
+    '22151': { campus_id: '3', name: 'Trondheim', type: '3 Years' },
+    '22144': { campus_id: '4', name: 'Stavanger', type: 'Semester' },
+    '22148': { campus_id: '4', name: 'Stavanger', type: 'Year' },
+    '22152': { campus_id: '4', name: 'Stavanger', type: '3 Years' },
+    */
+
+const variationToProductIdMapping: { [key: string]: string } = {
+    '22141': '50', // Semester
+    '22142': '50',
+    '22143': '50',
+    '22144': '50',
+    '22145': '69', // 2 years
+    '22146': '69',
+    '22147': '69',
+    '22148': '69',
+    '22149': '80', // 3 years
+    '22150': '80',
+    '22151': '80',
+    '22152': '80',
 };
