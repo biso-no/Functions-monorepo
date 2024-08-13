@@ -10,7 +10,7 @@ type Context = {
 
 interface RequestBody {
     customer: any;
-    custom_field_value: string;
+    snumber: string;
     selected_variation: string;
     price: string;
 }
@@ -24,27 +24,10 @@ export default async ({ req, res, log, error }: Context) => {
         log('Request body: ' + JSON.stringify(req.body));
 
         const body = req.body as RequestBody;
-        const { customer, custom_field_value, selected_variation, price } = body;
+        const { customer, snumber, selected_variation, price } = body;
 
-        // Manually extracting student_id from custom_field_value
-        let student_id = '';
-        try {
-            const match = custom_field_value.match(/s:\d+:"S(\d+)"/);
-            if (match && match[1]) {
-                student_id = match[1];
-            } else {
-                throw new Error('Invalid format');
-            }
-        } catch (err) {
-            const parseError = err as Error;
-            error('Error parsing custom_field_value: ' + parseError.message);
-            return res.json({ error: 'Invalid custom_field_value format' });
-        }
-
-        log(`Parsed student_id: ${student_id}`);
-
-        if (!customer || !student_id || !selected_variation) {
-            error('Missing required parameters: customer, student_id, or selected_variation');
+        if (!customer || !snumber || !selected_variation) {
+            error('Missing required parameters: customer, snumber, or selected_variation');
             return res.json({ error: 'Missing required parameters' });
         }
 
@@ -59,7 +42,7 @@ export default async ({ req, res, log, error }: Context) => {
         }
         log('Token response: ' + JSON.stringify(accessToken));
 
-        const studentId = parseInt(student_id, 10);
+        const studentId = parseInt(snumber, 10);
         let response;
         try {
             response = await getCustomer(accessToken, studentId);
@@ -75,14 +58,13 @@ export default async ({ req, res, log, error }: Context) => {
 
         if (response) {
             existingCustomer = response as Customer;
-            log(`Existing customer found for user_id: ${student_id} - ${JSON.stringify(existingCustomer)}`);
+            log(`Existing customer found for snumber: ${snumber} - ${JSON.stringify(existingCustomer)}`);
         } else if (shouldCreateCustomer) {
-            log(`Customer not found for user_id: ${student_id}, creating new customer...`);
+            log(`Customer not found for snumber: ${snumber}, creating new customer...`);
             const customerResponse = await createCustomer(accessToken, {
-                $id: student_id,
-                name: `${customer.first_name} ${customer.last_name}`,
-                firstName: customer.first_name,
-                lastName: customer.last_name,
+                Name: `${customer.first_name} ${customer.last_name}`,
+                studentId: snumber,
+                firstName: customer.first_name
             });
 
             if (!customerResponse) {
@@ -91,11 +73,11 @@ export default async ({ req, res, log, error }: Context) => {
             }
 
             existingCustomer = await customerResponse.json() as Customer;
-            log(`New customer created with ID: ${existingCustomer.Id} for user_id: ${studentId}`);
+            log(`New customer created with ID: ${existingCustomer.Id} for snumber: ${studentId}`);
         }
 
         if (!shouldCreateCustomer && !existingCustomer) {
-            log(`Customer not found for user_id: ${student_id}, and SHOULD_CREATE_CUSTOMER is false. Exiting early...`);
+            log(`Customer not found for snumber: ${snumber}, and SHOULD_CREATE_CUSTOMER is false. Exiting early...`);
             const membershipType = campusMapping[selected_variation].type;
             const campusName = campusMapping[selected_variation].name;
             const status = "Mottatt";
@@ -196,7 +178,6 @@ export default async ({ req, res, log, error }: Context) => {
         return res.json({ error: 'An unexpected error occurred' });
     }
 };
-
 
 // Utility function to determine department ID based on campus ID
 function determineDepartmentId(campusId: string): number {
