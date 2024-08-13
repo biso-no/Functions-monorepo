@@ -123,7 +123,7 @@ export default async ({ req, res, log, error }: Context) => {
 
         const userCampus = {
             campus: determineCampusId(selected_variation),
-            name: `${customer.first_name} ${customer.last_name}`,
+            name: campusMapping[selected_variation].name,
         };
 
         let invoiceResponse;
@@ -217,10 +217,10 @@ function determineAccrualDate(): string {
     let accrualDate: Date;
 
     // Determine the accrual date based on the purchase time of the year
-    if (currentDate.getMonth() >= 6) { // July or later (fall)
-        accrualDate = new Date(currentDate.getFullYear() + 1, 6, 1); // July 1st of next year
+    if (currentDate.getMonth() >= 6) { // July or later (July is month 6)
+        accrualDate = new Date(currentDate.getFullYear(), 6, 1); // July 1st of the current year
     } else { // January through June
-        accrualDate = new Date(currentDate.getFullYear(), 0, 1); // January 1st of this year
+        accrualDate = new Date(currentDate.getFullYear(), 5, 1); // June 1st of the current year
     }
 
     const yyyy = accrualDate.getFullYear();
@@ -229,6 +229,7 @@ function determineAccrualDate(): string {
 
     return `${yyyy}-${mm}-${dd}`;
 }
+
 
 
 
