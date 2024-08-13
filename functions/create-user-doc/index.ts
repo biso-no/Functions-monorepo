@@ -31,8 +31,8 @@ export default async ({ req, res, log, error }: Context) => {
     log('Admin client created successfully');
 
     log('Checking for existing user document with ID: ' + userId);
-    const existingUser = await databases.getDocument('app', 'user', userId);
-    if (existingUser.$id) {
+    const existingUser = await databases.listDocuments('app', 'user', [Query.equal('$id', userId)]);
+    if (existingUser.total > 0) {
         log('Existing document found: ' + JSON.stringify(existingUser));
         return res.json({ status: 'ok', exists: true });
     } else {
