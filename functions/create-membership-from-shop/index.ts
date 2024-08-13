@@ -135,6 +135,7 @@ export default async ({ req, res, log, error }: Context) => {
                 DepartmentId: departmentId,
                 IncludeVAT: true,
                 PaymentAmount: parseFloat(price),
+                DateInvoiced: new Date().toISOString(),
                 PaymentMethodId: 1,
                 PaymentTime: 0,
                 UserDefinedDimensions: [

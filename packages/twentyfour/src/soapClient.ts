@@ -165,6 +165,7 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
                 <OrderStatus>${data.OrderStatus}</OrderStatus>
                 <PaymentMethodId>${data.PaymentMethodId}</PaymentMethodId>
                 <PaymentTime>${data.PaymentTime}</PaymentTime>
+                <DateInvoiced>${data.DateInvoiced}</DateInvoiced>
                 <PaymentAmount>${data.PaymentAmount}</PaymentAmount>
                 <Distributor>Manual</Distributor>
                 <DepartmentId>${data.DepartmentId}</DepartmentId>
