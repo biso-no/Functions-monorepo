@@ -185,7 +185,7 @@ export default async ({ req, res, log, error }: Context) => {
             const name = existingCustomer.Name;
             const membershipType = membershipObj.category;
             const campusName = campusMapping[selected_variation].name;
-            const status = "Ferdig";
+            const status = "Faktura opprettet";
 
             log('Sending status update to Sharepoint for completed process...');
             await sendStatusUpdateToSharepoint(studentId, name, membershipType.toString(), status, campusName, log, error);
