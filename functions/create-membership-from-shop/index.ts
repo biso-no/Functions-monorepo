@@ -141,10 +141,10 @@ export default async ({ req, res, log, error }: Context) => {
         };
 
         let invoiceResponse;
+        if (existingCustomer && membershipObj) {
         try {
-            log(`Attempting to create invoice for customerId: ${studentId}...`);
-            invoiceResponse = await createInvoice(accessToken, {
-                CustomerId: studentId,
+            const invoiceBody = {
+                CustomerId: existingCustomer.Id,
                 OrderStatus: invoiceStatus,
                 DepartmentId: departmentId,
                 IncludeVAT: true,
@@ -172,11 +172,23 @@ export default async ({ req, res, log, error }: Context) => {
                 ],
                 AccrualDate: accrualDate,
                 AccrualLength: accrualLength,
-            });
+            };
+
+            log(`Attempting to create invoice for customerId: ${studentId}...`);
+            log('Invoice body: ' + JSON.stringify(invoiceBody));
+            invoiceResponse = await createInvoice(accessToken, invoiceBody);
             log('Invoice created successfully: ' + JSON.stringify(invoiceResponse));
         } catch (err) {
             error('Error creating invoice: ' + err);
+            const name = existingCustomer.Name;
+            const membershipType = membershipObj.category;
+            const campusName = campusMapping[selected_variation].name;
+            const status = "Faktura feilet";
+            log('Sending status update to Sharepoint for failed process...');
+            await sendStatusUpdateToSharepoint(studentId, name, membershipType.toString(), status, campusName, log, error);
+            log('Status update sent successfully');
             return res.json({ error: 'Failed to create invoice' });
+        }
         }
 
         if (invoiceResponse && existingCustomer && membershipObj) {
