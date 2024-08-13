@@ -144,12 +144,12 @@ export default async ({ req, res, log, error }: Context) => {
                 UserDefinedDimensions: [
                     {
                         Type: UserDefinedDimensionKey.UserDefined,
-                        Name: userCampus.name,
+                        Name: userCampus.campus.campus_id,
                         TypeId: '101',
                     },
                     {
                         Type: UserDefinedDimensionKey.UserDefined,
-                        Name: membershipObj.name,
+                        Name: determineMembershipId(membershipObj.name),
                         TypeId: '102',
                     },
                 ],
@@ -349,3 +349,16 @@ const variationToProductIdMapping: { [key: string]: string } = {
     '22151': '80',
     '22152': '80',
 };
+
+function determineMembershipId(membershipType: string): string {
+    switch (membershipType.toLowerCase()) {
+        case 'semester':
+            return '100';
+        case 'year':
+            return '200';
+        case '3 years':
+            return '300';
+        default:
+            throw new Error('Invalid membership type');
+    }
+}
