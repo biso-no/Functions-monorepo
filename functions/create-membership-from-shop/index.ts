@@ -42,7 +42,13 @@ export default async ({ req, res, log, error }: Context) => {
         }
         log('Token response: ' + JSON.stringify(accessToken));
 
-        const studentId = parseInt(snumber, 10);
+        const cleanedSnumber = snumber.replace(/[^0-9]/g, ''); // Remove all non-numeric characters
+        const studentId = parseInt(cleanedSnumber, 10); // Convert the cleaned string to an integer
+        
+        if (isNaN(studentId)) {
+            error('Invalid student number format');
+            return res.json({ error: 'Invalid student number format' });
+        }
         let response;
         try {
             response = await getCustomer(accessToken, studentId);
