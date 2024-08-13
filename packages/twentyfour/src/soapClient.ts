@@ -199,7 +199,7 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
       } catch (error) {
         log('Error during invoice creation: ' + error);
       }
-    }; 
+    };
       
   
     const getCustomerCategories = async (token: string) => {
