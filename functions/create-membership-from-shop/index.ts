@@ -144,12 +144,14 @@ export default async ({ req, res, log, error }: Context) => {
                 UserDefinedDimensions: [
                     {
                         Type: UserDefinedDimensionKey.UserDefined,
-                        Name: userCampus.campus.campus_id,
+                        Name: userCampus.campus.name,
+                        Value: userCampus.campus.campus_id,
                         TypeId: '101',
                     },
                     {
                         Type: UserDefinedDimensionKey.UserDefined,
                         Name: determineMembershipId(membershipObj.name),
+                        Value: membershipObj.name,
                         TypeId: '102',
                     },
                 ],

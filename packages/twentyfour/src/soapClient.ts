@@ -147,6 +147,7 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
       const userDefinedDimensionsXML = data.UserDefinedDimensions?.map(udd => 
           `<UserDefinedDimension>
             <Type>${udd.Type}</Type>
+            <Name>${udd.Name}</Name>
             <Value>${udd.Name}</Value>
             <TypeId>${udd.TypeId}</TypeId>
           </UserDefinedDimension>`
