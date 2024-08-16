@@ -1,5 +1,5 @@
 import { Models } from "@biso/appwrite";
-import { Customer, customer, salesOrder, Status, soapClient, UserDefinedDimensionKey } from "@biso/twentyfour";
+import { Customer, soapClient, UserDefinedDimensionKey } from "@biso/twentyfour";
 
 type Context = {
     req: any;
@@ -33,7 +33,7 @@ export default async ({ req, res, log, error }: Context) => {
 
         const shouldCreateCustomer = SHOULD_CREATE_CUSTOMER === 'true';
         let existingCustomer: Customer | null = null;
-        const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer } = soapClient(log, error);
+        const { createInvoice, getAccessToken, updateCustomerCategory, getCustomer, createCustomer, getCustomerByExternalId } = soapClient(log, error);
 
         log('Attempting to retrieve access token...');
         const { accessToken, status: tokenStatus } = await getAccessToken();
@@ -57,13 +57,20 @@ export default async ({ req, res, log, error }: Context) => {
             response = await getCustomer(accessToken, studentId);
             log('Response: ' + JSON.stringify(response));
         } catch (err) {
-            error(`Error during customer retrieval: ${err}`);
-            const membershipType = campusMapping[selected_variation].type;
-            const campusName = campusMapping[selected_variation].name;
-            const status = "Mottatt";
-            log('Sending status update to Sharepoint due to customer retrieval failure...');
-            await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, campusName, log, error);
-            return res.json({ error: 'Failed to retrieve customer' });
+            error(`Error during customer retrieval on CompanyId, trying with ExternalId: ${err}`);
+            try {
+                log(`Attempting to retrieve customer with ExternalId: ${studentId}`);
+                response = await getCustomerByExternalId(accessToken, studentId);
+                log('Response: ' + JSON.stringify(response));
+            } catch (err) {
+                error(`Error during customer retrieval on ExternalId: ${err}`);
+                const membershipType = campusMapping[selected_variation].type;
+                const campusName = campusMapping[selected_variation].name;
+                const status = "Mottatt";
+                log('Sending status update to Sharepoint due to customer retrieval failure...');
+                await sendStatusUpdateToSharepoint(studentId, `${customer.first_name} ${customer.last_name}`, membershipType.toString(), status, campusName, log, error);
+                return res.json({ error: 'Failed to retrieve customer' });
+            }
         }
 
         if (response) {

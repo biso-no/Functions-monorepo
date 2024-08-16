@@ -324,6 +324,55 @@ const getCustomer = async (token: string, customerId: number) => {
   }
 };
 
+const getCustomerByExternalId = async (token: string, customerId: number) => {
+  //A student ID looks like this: s1715738. remove the s
+
+try {
+  const body = `<?xml version="1.0" encoding="utf-8"?>
+  <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+    <soap12:Body>
+      <GetCompanies xmlns="http://24sevenOffice.com/webservices">
+        <searchParams>
+          <ExternalId>${customerId}</ExternalId>
+        </searchParams>
+        <returnProperties>
+          <string>Name</string>
+          <string>CompanyId</string>
+        </returnProperties>
+      </GetCompanies>
+    </soap12:Body>
+  </soap12:Envelope>`;
+
+  const response = await axios.post('https://api.24sevenoffice.com/CRM/Company/V001/CompanyService.asmx', body, {
+      headers: {
+          'Content-Type': 'application/soap+xml; charset=utf-8',
+          'Cookie': 'ASP.NET_SessionId=' + token
+      }
+  });
+
+  const parsedResponse = await parseStringPromise(response.data, {
+      explicitArray: false, // Prevent arrays for single elements
+      ignoreAttrs: true // Ignore attributes
+  });
+
+  // Extract the customer(s) from the parsed response
+  const companies = parsedResponse['soap:Envelope']['soap:Body']['GetCompaniesResponse']?.['GetCompaniesResult']?.['Company'];
+
+  // Ensure that there is at least one company in the response
+  if (!companies) {
+      throw new Error('No companies found in the response');
+  }
+
+  // If companies is an array, return the first company, otherwise return the single company object
+  return Array.isArray(companies) ? companies[0] : companies;
+
+} catch (error) {
+  log('Error during customer retrieval: ' + error);
+  throw error;
+}
+};
+
+
 
 
 const createCustomer = async (token: string, user: Partial<Models.Document>) => {
@@ -386,6 +435,7 @@ const createCustomer = async (token: string, user: Partial<Models.Document>) => 
         getCustomerCategories,
         updateCustomerCategory,
         getCustomer,
-        createCustomer
+        createCustomer,
+        getCustomerByExternalId
     };
 };
