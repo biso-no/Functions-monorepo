@@ -187,7 +187,7 @@ export default async ({ req, res, log, error }: Context) => {
             const name = existingCustomer.Name;
             const membershipType = campusMapping[selected_variation].type;
             const campusName = campusMapping[selected_variation].name;
-            const status = "Faktura opprettet";
+            const status = SHOULD_INVOICE === "true" ? "Ferdig" : "Faktura opprettet";
 
             log('Sending status update to Sharepoint for completed process...');
             await sendStatusUpdateToSharepoint(studentId, name, membershipType.toString(), status, campusName, log, error);
