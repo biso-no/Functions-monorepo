@@ -1,4 +1,4 @@
-import { getContentByHashtag } from "@biso/instagram";
+import { getMedia } from "@biso/instagram";
 
 type Context = {
     req: any;
@@ -17,7 +17,7 @@ export default async ({ req, res, log, error }: Context) => {
         return res.json({ error: 'Missing required parameters' });
     }
 
-    const content = await getContentByHashtag(hashtag);
+    const content = await getMedia(hashtag);
 
     return res.json({ content });
 }
