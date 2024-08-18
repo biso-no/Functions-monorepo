@@ -7,11 +7,6 @@
     "@biso/appwrite": "0.0.1",
     "@biso/twentyfour": "0.0.1",
     "bun-types": "latest",
-    "php-unserialize": "^0.0.1",
-    "phpunserialize": "^1.3.0",
     "zod": "1"
-  },
-  "devDependencies": {
-    "@types/php-unserialize": "^0.0.1"
   }
 }
