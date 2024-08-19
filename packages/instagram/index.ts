@@ -9,5 +9,5 @@ export async function getMedia({
     hashtag?: string;
 }) {
     const medias = await user.getMedia([], undefined, true);
-    return medias;
+    return medias.sourceObject;
 }
