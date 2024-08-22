@@ -18,6 +18,7 @@ interface InvoiceRow {
 interface UserDefinedDimensions {
     Type: UserDefinedDimensionKey;
     Name: string;
+    Value: string;
     TypeId: string;
 }
 
