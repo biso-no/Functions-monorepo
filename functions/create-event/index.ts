@@ -74,10 +74,10 @@ export default async ({ req, res, log, error }: Context) => {
             }
 
             );
-
+            log('Event response: ' + JSON.stringify(event));
             return res.json({ message: 'Event created successfully' });
         } catch (error) {
-            return res.status(500).json({ message: 'Event creation failed', error });
+            return res.json({ message: 'Event creation failed', error });
         }
     }
 
@@ -95,10 +95,10 @@ export default async ({ req, res, log, error }: Context) => {
                 slug,
                 status
             });
-
+            log('Event response: ' + JSON.stringify(event));
             return res.json({ message: 'Event updated successfully' });
         } catch (error) {
-            return res.status(500).json({ message: 'Event update failed', error });
+            return res.json({ message: 'Event update failed', error });
         }
     }
 
