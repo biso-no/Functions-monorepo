@@ -29,11 +29,11 @@ interface Context {
 
 function getCampusIdFromOrganizerSlug(slug: string) {
     const campusMapping = {
-        'biso-oslo': 1,
-        'biso-bergen': 2,
-        'biso-stavanger': 3,
-        'biso-trondheim': 4,
-        'biso-national': 5
+        'biso-oslo': '1',
+        'biso-bergen': '2',
+        'biso-stavanger': '3',
+        'biso-trondheim': '4',
+        'biso-national': '5'
     } as const;
     
     // Return the corresponding campus ID or undefined if the slug doesn't match
