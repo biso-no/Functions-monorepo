@@ -15,8 +15,8 @@ interface Event {
         content: {
             rendered: string;
         };
+        };
         organizer_name: string;
-            };
     }
 }
 
@@ -58,11 +58,12 @@ export default async ({ req, res, log, error }: Context) => {
                 status,
                 link,
                 title,
-                content,
-                organizer_name
-            }
+                content
+            },
+            organizer_name
         }
     } = req.body as Event;
+    
 
 
     log(`Processing event: ${event} for organizer: ${organizer_name} with ID: ${id}`);
