@@ -52,7 +52,7 @@ interface Acf {
 
 export default async ({ req, res, log, error }: Context) => {
 
-    log('Request received' + req.body);
+    log('Request received' + JSON.stringify(req.body));
 
     if (req.method === 'GET') {
         return res.json({ message: 'Not allowed.' });
@@ -75,25 +75,29 @@ export default async ({ req, res, log, error }: Context) => {
     if (req.method === 'POST') {
     const client = createAdminClient();
 
-    const event = (await client).databases.createDocument('app', 'events', id, {
-        title,
-        description: content,
-        event_date: start_date,
-        image,
-        campus_id: getCampusIdFromOrganizerSlug(organizer),
-        campus: getCampusIdFromOrganizerSlug(organizer),
-        price: cost,
-        url,
-    });
-    log('Event created' + JSON.stringify(event));
-    
-
-
-
+    try {
+        const event = (await client).databases.createDocument('app', 'events', id, {
+            id: id,
+            date: start_date,
+            link: location,
+            slug: id,
+            status: 'published',
+            title,
+            description: content,
+            campus: getCampusIdFromOrganizerSlug(organizer),
+            campus_id: getCampusIdFromOrganizerSlug(organizer),
+            price: cost,
+            url
+        });
+        log('Event created' + JSON.stringify(event));
         return res.json(event);
+    } catch (error) {
+        log('Error occurred: ' + JSON.stringify(error));
+        return res.json({ message: 'Internal server error' });
     }
-
 }
+};
+
 function getCampusIdFromOrganizerSlug(slug: string) {
     const campusMapping = {
         'biso-oslo': 1,
