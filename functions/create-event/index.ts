@@ -3,6 +3,7 @@ import { createAdminClient } from "@biso/appwrite";
 interface Event {
     event: string;
     data: {
+        event: {
         id: number;
         date: string;
         slug: string;
@@ -14,8 +15,9 @@ interface Event {
         content: {
             rendered: string;
         };
+        organizer_name: string;
+            };
     }
-    organizer_name: string;
 }
 
 interface Context {
@@ -49,16 +51,19 @@ export default async ({ req, res, log, error }: Context) => {
     const { 
         event,
         data: {
-            id,
-            date,
-            slug,
-            status,
-            link,
-            title,
-            content,
-        },
-        organizer_name
+            event: {
+                id,
+                date,
+                slug,
+                status,
+                link,
+                title,
+                content,
+                organizer_name
+            }
+        }
     } = req.body as Event;
+
 
     log(`Processing event: ${event} for organizer: ${organizer_name} with ID: ${id}`);
 
