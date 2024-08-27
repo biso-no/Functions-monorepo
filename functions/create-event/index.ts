@@ -24,6 +24,7 @@ interface Context {
     log: (msg: any) => void;
     error: (msg: any) => void;
 };
+
 function getCampusIdFromOrganizerSlug(slug: string) {
     const campusMapping = {
         'biso-oslo': 1,
@@ -36,11 +37,12 @@ function getCampusIdFromOrganizerSlug(slug: string) {
     // Return the corresponding campus ID or undefined if the slug doesn't match
     return campusMapping[slug as keyof typeof campusMapping];
 }
-export default async ({ req, res, log, error }: Context) => {
 
-    log('Request received' + JSON.stringify(req.body));
+export default async ({ req, res, log, error }: Context) => {
+    log('Request received with method: ' + req.method + ' and body: ' + JSON.stringify(req.body));
 
     if (req.method === 'GET') {
+        log('GET method not allowed');
         return res.json({ message: 'Not allowed.' });
     }
 
@@ -58,34 +60,15 @@ export default async ({ req, res, log, error }: Context) => {
         organizer_name
     } = req.body as Event;
 
+    log(`Processing event: ${event} for organizer: ${organizer_name} with ID: ${id}`);
+
+    const client = createAdminClient();
+
     if (event === 'event_created') {
-        const client = createAdminClient();
+        log('Starting event creation process');
 
         try {
-            const event = (await client).databases.createDocument('app', 'event', id.toString(), {
-                title: title.rendered,
-                description: content.rendered,
-                event_date: date,
-                campus_id: getCampusIdFromOrganizerSlug(organizer_name),
-                campus: getCampusIdFromOrganizerSlug(organizer_name),
-                url: link,
-                slug,
-                status
-            }
-
-            );
-            log('Event response: ' + JSON.stringify(event));
-            return res.json({ message: 'Event created successfully' });
-        } catch (error) {
-            return res.json({ message: 'Event creation failed', error });
-        }
-    }
-
-    if (event === 'event_updated') {
-        const client = createAdminClient();
-
-        try {
-            const event = (await client).databases.updateDocument('app', 'events', id.toString(), {
+            const eventResponse = await (await client).databases.createDocument('app', 'event', id.toString(), {
                 title: title.rendered,
                 description: content.rendered,
                 event_date: date,
@@ -95,13 +78,36 @@ export default async ({ req, res, log, error }: Context) => {
                 slug,
                 status
             });
-            log('Event response: ' + JSON.stringify(event));
-            return res.json({ message: 'Event updated successfully' });
-        } catch (error) {
-            return res.json({ message: 'Event update failed', error });
+            log('Event created successfully with response: ' + JSON.stringify(eventResponse));
+            return res.json({ message: 'Event created successfully' });
+        } catch (err) {
+            error('Event creation failed: ' + (err instanceof Error ? err.message : JSON.stringify(err)));
+            return res.json({ message: 'Event creation failed', error: err });
         }
     }
 
-    res.json({ message: 'Event not found' });
+    if (event === 'event_updated') {
+        log('Starting event update process');
 
+        try {
+            const eventResponse = await (await client).databases.updateDocument('app', 'events', id.toString(), {
+                title: title.rendered,
+                description: content.rendered,
+                event_date: date,
+                campus_id: getCampusIdFromOrganizerSlug(organizer_name),
+                campus: getCampusIdFromOrganizerSlug(organizer_name),
+                url: link,
+                slug,
+                status
+            });
+            log('Event updated successfully with response: ' + JSON.stringify(eventResponse));
+            return res.json({ message: 'Event updated successfully' });
+        } catch (err) {
+            error('Event update failed: ' + (err instanceof Error ? err.message : JSON.stringify(err)));
+            return res.json({ message: 'Event update failed', error: err });
+        }
+    }
+
+    log('Event not found or unsupported event type: ' + event);
+    return res.json({ message: 'Event not found' });
 }
