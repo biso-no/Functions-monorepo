@@ -52,6 +52,8 @@ interface Acf {
 
 export default async ({ req, res, log, error }: Context) => {
 
+    log('Request received' + req.body);
+
     if (req.method === 'GET') {
         return res.json({ message: 'Not allowed.' });
     }
@@ -83,7 +85,7 @@ export default async ({ req, res, log, error }: Context) => {
         price: cost,
         url,
     });
-
+    log('Event created' + JSON.stringify(event));
     
 
 
