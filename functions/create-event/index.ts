@@ -62,7 +62,7 @@ export default async ({ req, res, log, error }: Context) => {
         const client = createAdminClient();
 
         try {
-            const event = (await client).databases.createDocument('app', 'events', id.toString(), {
+            const event = (await client).databases.createDocument('app', 'event', id.toString(), {
                 title: title.rendered,
                 description: content.rendered,
                 event_date: date,
