@@ -31,8 +31,8 @@ function getCampusIdFromOrganizerSlug(slug: string) {
     const campusMapping = {
         'biso-oslo': '1',
         'biso-bergen': '2',
-        'biso-stavanger': '3',
-        'biso-trondheim': '4',
+        'biso-trondheim': '3',
+        'biso-stavanger': '4',
         'biso-national': '5'
     } as const;
     
