@@ -236,6 +236,40 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
       }
   };
 
+  const userCategories = async (token: string, studentId: number) => {
+    try {
+      const body = `<?xml version="1.0" encoding="utf-8"?>
+      <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+        <soap12:Body>
+          <GetCustomerCategories xmlns="http://24sevenOffice.com/webservices">
+            <customerId>${studentId}</customerId>
+          </GetCustomerCategories>
+        </soap12:Body>
+      </soap12:Envelope>
+      `;
+
+      const response = await axios.post('https://api.24sevenoffice.com/CRM/Company/V001/CompanyService.asmx', body, {
+          headers: {
+              'Content-Type': 'application/soap+xml; charset=utf-8',
+              'Cookie': 'ASP.NET_SessionId=' + token
+          }
+      });
+
+      const parsedResponse = await parseStringPromise(response.data, {
+          explicitArray: false, // This option prevents arrays from being created for each element
+          ignoreAttrs: true // This option ignores the attributes and only parses the values
+      });
+
+      // Extract the customer categories from the parsed response
+      const categories = parsedResponse['soap:Envelope']['soap:Body']['GetCustomerCategoriesResponse']['GetCustomerCategoriesResult']['customerCategories']['KeyValuePair'];
+      return categories;
+
+  } catch (error) {
+      log('Error during customer category retrieval: ' + error);
+      throw error;
+  }
+}
+
   const updateCustomerCategory = async (token: string, customerCategoryId: number, studentId: number) => {
     
     try {
@@ -437,6 +471,7 @@ const createCustomer = async (token: string, user: Partial<Models.Document>) => 
         updateCustomerCategory,
         getCustomer,
         createCustomer,
-        getCustomerByExternalId
+        getCustomerByExternalId,
+        userCategories
     };
 };
