@@ -237,39 +237,57 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
   };
 
   const userCategories = async (token: string, studentId: number) => {
-    log('Fetching user categories...');
     try {
-      const body = `<?xml version="1.0" encoding="utf-8"?>
-      <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
-        <soap12:Body>
-          <GetCustomerCategories xmlns="http://24sevenOffice.com/webservices">
-            <customerId>${studentId}</customerId>
-          </GetCustomerCategories>
-        </soap12:Body>
-      </soap12:Envelope>
-      `;
+        const body = `<?xml version="1.0" encoding="utf-8"?>
+        <soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+            <soap12:Body>
+                <GetCustomerCategories xmlns="http://24sevenOffice.com/webservices">
+                    <customerId>${studentId}</customerId>
+                </GetCustomerCategories>
+            </soap12:Body>
+        </soap12:Envelope>`;
 
-      const response = await axios.post('https://api.24sevenoffice.com/CRM/Company/V001/CompanyService.asmx', body, {
-          headers: {
-              'Content-Type': 'application/soap+xml; charset=utf-8',
-              'Cookie': 'ASP.NET_SessionId=' + token
-          }
-      });
+        const response = await axios.post(
+            'https://api.24sevenoffice.com/CRM/Company/V001/CompanyService.asmx',
+            body,
+            {
+                headers: {
+                    'Content-Type': 'application/soap+xml; charset=utf-8',
+                    'Cookie': 'ASP.NET_SessionId=' + token
+                }
+            }
+        );
 
-      const parsedResponse = await parseStringPromise(response.data, {
-          explicitArray: false, // This option prevents arrays from being created for each element
-          ignoreAttrs: true // This option ignores the attributes and only parses the values
-      });
+        const parsedResponse = await parseStringPromise(response.data, {
+            explicitArray: false,
+            ignoreAttrs: true
+        });
 
-      // Extract the customer categories from the parsed response
-      const categories = parsedResponse['soap:Envelope']['soap:Body']['GetCustomerCategoriesResponse']['GetCustomerCategoriesResult']['customerCategories']['KeyValuePair'];
-      return categories;
+        // Get the categories array, handling both single and multiple category cases
+        const result = parsedResponse['soap:Envelope']['soap:Body']['GetCustomerCategoriesResponse']['GetCustomerCategoriesResult'];
+        let categories = result?.customerCategories?.KeyValuePair || [];
+        
+        // If it's a single category, wrap it in an array
+        if (!Array.isArray(categories)) {
+            categories = [categories];
+        }
 
-  } catch (error) {
-      log('Error during customer category retrieval: ' + error);
-      throw error;
-  }
-}
+        // Extract just the Values from the KeyValuePair objects
+        const categoryNames = categories.map((cat: any) => cat.Value || '').filter(Boolean);
+
+        return {
+            status: 'ok',
+            data: categoryNames
+        };
+
+    } catch (error) {
+        log('Error during customer category retrieval: ' + error);
+        return {
+            status: 'error',
+            data: []
+        };
+    }
+};
 
   const updateCustomerCategory = async (token: string, customerCategoryId: number, studentId: number) => {
     
