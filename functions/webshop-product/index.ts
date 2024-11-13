@@ -24,7 +24,7 @@ export default async ({ req, res, log, error }: Context) => {
 
     // Get product ID from request body
    const { productId } = req.body;
-
+    log("Product ID: " + productId);
     try {
         // Fetch specific product from WooCommerce API
         const response = await axios.get(`https://biso.no/wp-json/wc/v3/products/${productId}`, {
