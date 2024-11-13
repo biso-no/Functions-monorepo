@@ -35,7 +35,7 @@ export default async ({ req, res, log, error }: Context) => {
         });
 
         const product = response.data;
-
+        console.log("Product: ", product);
         // Transform the product data to match your interface
         const transformedProduct: Product = {
             id: product.id,
@@ -48,7 +48,7 @@ export default async ({ req, res, log, error }: Context) => {
             description: product.description,
             url: product.permalink,
         };
-
+        console.log("Transformed Product: ", transformedProduct);
         return res.json({ product: transformedProduct });
     } catch (err: any) {
         // Check if the error is due to product not found
