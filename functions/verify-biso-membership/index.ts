@@ -13,14 +13,10 @@ interface RequestBody {
 }
 
 export default async ({ req, res, log, error }: Context) => {
-    const body = req.body as RequestBody;
 
-    if (!body.snumber) {
-        error('Missing required parameters: snumber');
-        return res.json({ error: 'Missing required parameters' });
-    }
+    const snumber = req.body;
 
-    const cleanedSnumber = body.snumber.replace(/[^0-9]/g, '');
+    const cleanedSnumber = snumber.replace(/[^0-9]/g, '');
     const studentId = parseInt(cleanedSnumber, 10);
 
     const { databases } = await createAdminClient();
