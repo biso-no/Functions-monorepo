@@ -27,7 +27,7 @@ export default async ({ req, res, log, error }: Context) => {
         Query.equal('status', true),
         Query.select(['$id', 'membership_id', 'name', 'price', 'category', 'status', 'expiryDate']),
     ]);
-
+    log("Memberships: " + JSON.stringify(memberships));
     if (!memberships.documents || memberships.documents.length === 0) {
         log('No active memberships found in the database');
     }
@@ -40,6 +40,7 @@ export default async ({ req, res, log, error }: Context) => {
     }
 
     const customerCategories = await userCategories(accessToken.accessToken, studentId);
+    log("Customer categories: " + JSON.stringify(customerCategories));
     if (customerCategories.status !== 'ok') {
         log('Failed to retrieve customer categories');
         return res.json({ error: 'Failed to retrieve customer categories' });
@@ -51,16 +52,17 @@ export default async ({ req, res, log, error }: Context) => {
             category.toLowerCase() === membership.name.toLowerCase()
         );
     });
-
+    log("Matched membership: " + JSON.stringify(matchedMembership));
     if (matchedMembership) {
         // Filter out memberships without a valid expiryDate, just in case
         const sortedMemberships = memberships.documents
             .filter(m => m.name.toLowerCase() === matchedMembership.name.toLowerCase() && m.expiryDate)
             .sort((a, b) => new Date(b.expiryDate).getTime() - new Date(a.expiryDate).getTime());
-        
+            log("Sorted memberships: " + JSON.stringify(sortedMemberships));
         // Check if there's at least one valid membership after filtering
         if (sortedMemberships.length > 0) {
             const latestMembership = sortedMemberships[0]; // Pick the one with the latest expiry date
+            log("Latest membership: " + JSON.stringify(latestMembership));
             return res.json({ membership: latestMembership });
         } else {
             log('No valid memberships with an expiry date found for this user');
