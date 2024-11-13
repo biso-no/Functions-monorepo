@@ -258,30 +258,38 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
             }
         );
 
+        log(`Raw SOAP Response: ${response.data}`);
+
         const parsedResponse = await parseStringPromise(response.data, {
             explicitArray: false,
             ignoreAttrs: true
         });
 
-        // Get the categories array, handling both single and multiple category cases
+        log(`Parsed Response: ${JSON.stringify(parsedResponse)}`);
+
+        // Get the int values from GetCustomerCategoriesResult
         const result = parsedResponse['soap:Envelope']['soap:Body']['GetCustomerCategoriesResponse']['GetCustomerCategoriesResult'];
-        let categories = result?.customerCategories?.KeyValuePair || [];
+        let categories = result?.int || [];
         
         // If it's a single category, wrap it in an array
         if (!Array.isArray(categories)) {
             categories = [categories];
         }
 
-        // Extract just the Values from the KeyValuePair objects
-        const categoryNames = categories.map((cat: any) => cat.Value || '').filter(Boolean);
+        // Convert to numbers and filter out any invalid values
+        const categoryIds = categories
+            .map((cat: string) => parseInt(cat, 10))
+            .filter((id: number) => !isNaN(id));
+
+        log(`Extracted category IDs: ${JSON.stringify(categoryIds)}`);
 
         return {
             status: 'ok',
-            data: categoryNames
+            data: categoryIds
         };
 
     } catch (error) {
-        log('Error during customer category retrieval: ' + error);
+        log(`Error during customer category retrieval: ${error}`);
         return {
             status: 'error',
             data: []
