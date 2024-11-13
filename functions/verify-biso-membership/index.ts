@@ -30,7 +30,6 @@ export default async ({ req, res, log, error }: Context) => {
 
     if (!memberships.documents || memberships.documents.length === 0) {
         log('No active memberships found in the database');
-        return res.json({ error: 'No active memberships found' });
     }
 
     // Fetch user categories from 24SevenOffice
