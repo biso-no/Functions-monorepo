@@ -15,6 +15,7 @@ interface Product {
     images: string[];
     price: string;
     sale_price: string;
+    short_description: string;
     description: string;
     url: string;
 }
@@ -45,6 +46,7 @@ export default async ({ req, res, log, error }: Context) => {
             images: product.images.map((img: any) => img.src),
             price: product.price,
             sale_price: product.sale_price,
+            short_description: product.short_description,
             description: product.description,
             url: product.permalink,
         };
