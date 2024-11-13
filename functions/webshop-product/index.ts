@@ -23,17 +23,7 @@ export default async ({ req, res, log, error }: Context) => {
     log('Request received');
 
     // Get product ID from request body
-    let productId;
-    try {
-        ({ productId } = JSON.parse(req.body) || {});
-        
-        if (!productId) {
-            return res.json({ message: 'Product ID is required' });
-        }
-    } catch (err) {
-        log('Error parsing request body');
-        return res.json({ message: 'Invalid request body' });
-    }
+   const { productId } = req.body;
 
     try {
         // Fetch specific product from WooCommerce API
