@@ -23,6 +23,7 @@ export default async ({ req, res, log, error }: Context) => {
     log('Request received');
 
     // Get product ID from request body
+    log("Request body: " + JSON.stringify(req.body));
    const { productId } = req.body;
     log("Product ID: " + productId);
     try {
@@ -51,7 +52,7 @@ export default async ({ req, res, log, error }: Context) => {
         log(`Transformed product: ${JSON.stringify(transformedProduct)}`);
         return res.json({ product: transformedProduct });
     } catch (err: any) {
-        // Check if the error is due to product not found
+        error(`Error during product retrieval: ${err.message}`);
         if (err.response?.status === 404) {
             return res.json({ message: 'Product not found' });
         }
