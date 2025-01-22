@@ -280,18 +280,18 @@ async function sendStatusUpdateToSharepoint(studentId: number, name: string, mem
 
 
 const campusMapping: { [key: string]: { campus_id: string, name: string, type: string } } = {
-    '22141': { campus_id: '1', name: 'Oslo', type: 'Semester' },
-    '22145': { campus_id: '1', name: 'Oslo', type: 'Year' },
-    '22149': { campus_id: '1', name: 'Oslo', type: '3 Years' },
-    '22142': { campus_id: '2', name: 'Bergen', type: 'Semester' },
-    '22146': { campus_id: '2', name: 'Bergen', type: 'Year' },
-    '22150': { campus_id: '2', name: 'Bergen', type: '3 Years' },
-    '22143': { campus_id: '3', name: 'Trondheim', type: 'Semester' },
-    '22147': { campus_id: '3', name: 'Trondheim', type: 'Year' },
-    '22151': { campus_id: '3', name: 'Trondheim', type: '3 Years' },
-    '22144': { campus_id: '4', name: 'Stavanger', type: 'Semester' },
-    '22148': { campus_id: '4', name: 'Stavanger', type: 'Year' },
-    '22152': { campus_id: '4', name: 'Stavanger', type: '3 Years' },
+    '36728': { campus_id: '1', name: 'Oslo', type: 'Semester' },
+    '36732': { campus_id: '1', name: 'Oslo', type: 'Year' },
+    '36736': { campus_id: '1', name: 'Oslo', type: '3 Years' },
+    '36729': { campus_id: '2', name: 'Bergen', type: 'Semester' },
+    '36733': { campus_id: '2', name: 'Bergen', type: 'Year' },
+    '36737': { campus_id: '2', name: 'Bergen', type: '3 Years' },
+    '36730': { campus_id: '3', name: 'Trondheim', type: 'Semester' },
+    '36734': { campus_id: '3', name: 'Trondheim', type: 'Year' },
+    '36738': { campus_id: '3', name: 'Trondheim', type: '3 Years' },
+    '36731': { campus_id: '4', name: 'Stavanger', type: 'Semester' },
+    '36735': { campus_id: '4', name: 'Stavanger', type: 'Year' },
+    '36739': { campus_id: '4', name: 'Stavanger', type: '3 Years' },
 };
 
 
@@ -315,18 +315,18 @@ function determineCampusId(selected_variation: string): { campus_id: string, nam
 }
 
 const categoryMapping: { [key: string]: number } = {
-    '22141': 113170, // Semester
-    '22142': 113170,
-    '22143': 113170,
-    '22144': 113170,
-    '22145': 113172, // 2 years
-    '22146': 113172,
-    '22147': 113172,
-    '22148': 113172,
-    '22149': 113171, // 3 years
-    '22150': 113171,
-    '22151': 113171,
-    '22152': 113171,
+    '36728': 113170, // Semester
+    '36729': 113170,
+    '36730': 113170,
+    '36731': 113170,
+    '36732': 113172, // 1 Year
+    '36733': 113172,
+    '36734': 113172,
+    '36735': 113172,
+    '36736': 113171, // 3 years
+    '36737': 113171,
+    '36738': 113171,
+    '36739': 113171,
 };
 
 /*
@@ -345,18 +345,18 @@ const categoryMapping: { [key: string]: number } = {
     */
 
 const variationToProductIdMapping: { [key: string]: string } = {
-    '22141': '50', // Semester
-    '22142': '50',
-    '22143': '50',
-    '22144': '50',
-    '22145': '69', // 2 years
-    '22146': '69',
-    '22147': '69',
-    '22148': '69',
-    '22149': '80', // 3 years
-    '22150': '80',
-    '22151': '80',
-    '22152': '80',
+    '36728': '50', // Semester
+    '36729': '50',
+    '36730': '50',
+    '36731': '50',
+    '36732': '69', // 1 Year
+    '36733': '69',
+    '36734': '69',
+    '36735': '69',
+    '36736': '80', // 3 years
+    '36737': '80',
+    '36738': '80',
+    '36739': '80',
 };
 
 function determineMembershipId(membershipType: string): string {
