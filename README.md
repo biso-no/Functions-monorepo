@@ -154,4 +154,4 @@ Phone: +47 98471622
 
 ---
 
-*Last updated: January 28th 2025*
+*Last updated: January 29th 2025*
