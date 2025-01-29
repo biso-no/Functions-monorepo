@@ -97,6 +97,20 @@ functions-monorepo/
 - Bun or Yarn package manager
 - Required API keys and credentials for various services
 
+### Package Management
+> ⚠️ **Important**: When installing new npm packages for a specific package in the monorepo, you must run the install command from within that package's directory, not at the root level.
+
+Example:
+```bash
+# Correct way
+cd packages/instagram
+bun add axios   # or yarn add axios
+
+# Incorrect way
+# Don't install package dependencies from root
+bun add axios   # ❌
+```
+
 ### Environment Setup
 Each function and package may require specific environment variables. Please refer to the individual function/package documentation for detailed requirements.
 

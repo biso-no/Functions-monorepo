@@ -12,7 +12,7 @@ yarn install
 
 ## 🔧 Configuration
 
-The package requires the following environment variables:
+The package requires the following environment variables in the root directory:
 
 ```env
 TWENTYFOUR_API_KEY=your_api_key
@@ -75,9 +75,7 @@ const product = await getProduct('product_id');
 
 ## ⚠️ Important Notes
 
-- API calls are rate-limited
 - Some operations require specific user permissions in 24SevenOffice
-- Keep track of API usage for billing purposes
 - Implement proper error handling for API responses
 
 ## 🤝 Contributing

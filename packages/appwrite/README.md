@@ -12,7 +12,7 @@ yarn install
 
 ## 🔧 Configuration
 
-The package requires the following environment variables:
+The package requires the following environment variables (In the root of the monorepo):
 
 ```env
 APPWRITE_ENDPOINT=your_appwrite_endpoint
@@ -22,26 +22,58 @@ APPWRITE_API_KEY=your_api_key
 
 ## 🚀 Usage
 
+### Directly call Appwrite methods from a function
 ```typescript
-import { initializeAppwrite, createDocument } from '@biso/appwrite';
-
-// Initialize Appwrite client
-const client = initializeAppwrite();
+import { createDocument, ID } from '@biso/appwrite';
 
 // Example: Create a document
-const document = await createDocument({
-  collectionId: 'your_collection_id',
-  data: {
-    // your document data
+const document = await createDocument(
+  'database_id',
+  'collection_id',
+  'document_id', // Or use the ID class provided. e.g ID.unique() to generate a unique ID.
+  {
+    property: 'some-data'
   }
-});
+);
+```
+### Create a function in the package.
+In addition to calling Appwrite APIs directly from a function endpoint, you may create the functions in the package, exposing only that function to the endpoint.
+In packages/appwrite:
+```typescript
+import { createDocument, ID } from '@biso/appwrite'
+
+export async function someFunction({
+  databaseId,
+  collectionId,
+  documentId,
+  data
+}: {
+  databaseId: string
+  collectionId: string
+  documentId?: string
+  data: any //Do not use the any type.
+}) {
+  const document = await createDocument(
+    databaseId,
+    collectionId,
+    documentId ?? ID.unique(),
+    data
+)}
+```
+In functions/some-function:
+```typescript
+import { someFunction } from '@biso/appwrite'
+
+const document = await someFunction({
+  databaseId: 'database_id',
+  collectionId: 'collection_id',
+  data: {
+    property: 'some_data'
+  }
+})
 ```
 
-## 📚 Available Functions
-
-### Authentication
-- `initializeAppwrite()`: Initialize the Appwrite client with configuration
-- `getCurrentUser()`: Get the currently authenticated user
+## 📚 Frequently used methods
 
 ### Database Operations
 - `createDocument()`: Create a new document in a collection
