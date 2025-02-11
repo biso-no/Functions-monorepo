@@ -207,7 +207,8 @@ export default async ({ req, res, log, error }: Context) => {
     const { uploadAttachment } = attachmentService(error, log);
     const { databases, storage } = await createAdminClient();
     const { getAccessToken, searchCustomer, createCustomer } = soapClient(error, log);
-
+    log('Starting approval flow');
+    log(req.body);
     try {
         const expenseId = req.body.$id;
         if (!expenseId) {
