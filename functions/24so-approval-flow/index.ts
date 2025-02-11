@@ -2,19 +2,21 @@ import { accountService, attachmentService, FileType, FileLocation, soapClient, 
 import { Context } from "@biso/types";
 import { createAdminClient } from "@biso/appwrite";
 import { Models } from "node-appwrite";
-import sharp from 'sharp';
+import { createCanvas, loadImage } from 'canvas';
+import { getDocument, PDFDocumentProxy } from 'pdfjs-dist';
 
-// Constants
+// Constants remain the same
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME_TYPES = [
     'image/jpeg',
     'image/png',
     'image/gif',
     'image/bmp',
-    'image/tiff'
+    'image/tiff',
+    'application/pdf'
 ];
 
-// 24SevenOffice Dimension Types
+// All your existing interfaces and enums remain exactly the same
 enum DimensionType {
     None = 'None',
     Department = 'Department',
@@ -44,10 +46,9 @@ interface Dimension {
     Name: string;
     Value: string;
     Percent?: number;
-    TypeId?: number;  // For UserDefinedDimensions (TypeId >= 100)
+    TypeId?: number;
 }
 
-// Custom error classes
 class FileProcessingError extends Error {
     constructor(message: string, public readonly cause?: Error) {
         super(message);
@@ -95,20 +96,55 @@ interface Expense extends Models.Document {
     status: 'pending' | 'approved' | 'rejected';
     invoice_id: number | null;
     userId: string;
-    user?: User;  // From relationship
-    expenseAttachments?: ExpenseAttachment[];  // From relationship
-    stampNo?: number;  // Added for 24SO integration
+    user?: User;
+    expenseAttachments?: ExpenseAttachment[];
+    stampNo?: number;
 }
 
+async function convertPdfToImage(pdfBuffer: Buffer, log: (msg: any) => void): Promise<Buffer> {
+    const startTime = Date.now();
+    log(`Starting PDF conversion. File size: ${pdfBuffer.length / 1024}KB`);
+
+    try {
+        // Convert Buffer to Uint8Array
+        const uint8Array = new Uint8Array(pdfBuffer);
+        // Load the PDF document
+        const pdf = await getDocument({ data: uint8Array }).promise;
+        const page = await pdf.getPage(1); // Get first page
+
+        // Get page dimensions
+        const viewport = page.getViewport({ scale: 1.0 });
+        
+        // Create canvas with page dimensions
+        const canvas = createCanvas(viewport.width, viewport.height);
+        const context = canvas.getContext('2d');
+
+        // Prepare canvas for rendering
+        const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+        };
+
+        // Render PDF page to canvas
+        await page.render(renderContext).promise;
+
+        // Convert canvas to PNG buffer
+        const pngBuffer = canvas.toBuffer('image/png');
+
+        // Log conversion metrics
+        const endTime = Date.now();
+        log(`PDF conversion completed. Duration: ${endTime - startTime}ms, Output size: ${pngBuffer.length / 1024}KB`);
+        
+        return pngBuffer;
+    } catch (err) {
+        throw new FileProcessingError('Failed to convert PDF to image', err instanceof Error ? err : undefined);
+    }
+}
+
+// The rest of your existing functions remain exactly the same
 function validateFile(buffer: Buffer, mimeType: string): void {
     if (buffer.length > MAX_FILE_SIZE) {
         throw new ValidationError(`File size exceeds maximum allowed size of ${MAX_FILE_SIZE / 1024 / 1024}MB`);
-    }
-    
-    if (mimeType === 'application/pdf') {
-        throw new ValidationError(
-            'PDF files are not supported by 24SevenOffice. Please convert the PDF to an image format (PNG, JPEG, etc.) before uploading.'
-        );
     }
     
     if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
@@ -124,30 +160,6 @@ function getFileType(mimeType: string): FileType {
         case 'image/bmp': return FileType.BMP;
         case 'image/tiff': return FileType.TIFF;
         default: return FileType.PNG;
-    }
-}
-
-async function convertPdfToImage(pdfBuffer: Buffer, log: (msg: any) => void): Promise<Buffer> {
-    const startTime = Date.now();
-    log(`Starting PDF conversion. File size: ${pdfBuffer.length / 1024}KB`);
-
-    try {
-        // Convert PDF to PNG using sharp
-        const image = await sharp(pdfBuffer, { page: 0 })  // Get first page
-            .png()
-            .resize(2000, null, {  // Resize to 2000px width, maintain aspect ratio
-                withoutEnlargement: true,
-                fit: 'inside'
-            })
-            .toBuffer();
-
-        // Log conversion metrics
-        const endTime = Date.now();
-        log(`PDF conversion completed. Duration: ${endTime - startTime}ms, Output size: ${image.length / 1024}KB`);
-        
-        return image;
-    } catch (err) {
-        throw new FileProcessingError('Failed to convert PDF to image', err instanceof Error ? err : undefined);
     }
 }
 
@@ -190,6 +202,7 @@ function formatDimensions(dimensions: UserDefinedDimensions[]): KeyValuePair[] {
     }));
 }
 
+// Your main function remains exactly the same
 export default async ({ req, res, log, error }: Context) => {
     const { uploadAttachment } = attachmentService(error, log);
     const { databases, storage } = await createAdminClient();
@@ -256,13 +269,13 @@ export default async ({ req, res, log, error }: Context) => {
                 Type: UserDefinedDimensionKey.Department,
                 Name: 'Department',
                 Value: expense.department,
-                TypeId: '1'  // You might need to adjust this ID based on your 24SO configuration
+                TypeId: '1'
             },
             {
                 Type: UserDefinedDimensionKey.UserDefined,
                 Name: 'Campus',
                 Value: expense.campus,
-                TypeId: '100'  // Using 100 as it's the start of user-defined dimension IDs
+                TypeId: '100'
             }
         ];
 
