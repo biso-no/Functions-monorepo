@@ -2,6 +2,7 @@ import { Models } from '@biso/appwrite';
 import axios from 'axios';
 import { parseStringPromise } from 'xml2js';
 import fetch from 'node-fetch';
+import { Campus, Department } from './types.js';
 
 const AUTH_URL = 'https://api.24sevenoffice.com/authenticate/v001/authenticate.asmx';
 const INVOICE_URL = 'https://api.24sevenoffice.com/Economy/InvoiceOrder/V001/InvoiceService.asmx';
@@ -235,6 +236,50 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
           throw error;
       }
   };
+
+  const getDepartments = async (token: string) => {
+    try {
+        
+        //Initialiserer et Array som skal holde transaksjonene.
+        const departmentsArray: Department[] = [];
+    
+    //Henter token fra første forespørsel i en await. Dvs at vi venter på at token skal bli hentet før vi fortsetter. Ellers vil funksjonen returnere en error.
+
+    //Forespørselen vi kjører til 24SevenOffice
+    const body = `<?xml version="1.0" encoding="utf-8"?>
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+      <soap:Body>
+        <GetDepartmentList xmlns="http://24sevenOffice.com/webservices" />
+      </soap:Body>
+    </soap:Envelope>`;
+    
+        //Respons
+        const response = await axios.post('https://api.24sevenoffice.com/Client/V001/ClientService.asmx', body, {
+            headers: {
+                'Content-Type': 'text/xml; charset=utf-8',
+                'SOAPAction': 'http://24sevenOffice.com/webservices/GetDepartmentList',
+                'Cookie': 'ASP.NET_SessionId=' + token
+            }
+        });
+        
+        //Parser transaksjonene til JSON
+        const departments = await parseStringPromise(response.data);
+
+        //A company is a customer
+        departments['soap:Envelope']['soap:Body'][0]['GetDepartmentListResponse'][0]['GetDepartmentListResult'][0]['Department'].forEach((company: Department) => {
+          departmentsArray.push({
+              Id: company['Id'][0],
+              Name: company['Name'][0],
+              Campus: parseInt(departments['Id'][0], 10) < 299 ? Campus.Oslo : parseInt(departments['Id'][0], 10) < 599 ? Campus.Bergen : parseInt(departments['Id'][0], 10) < 799 ? Campus.Trondheim : parseInt(departments['Id'][0], 10) < 999 ? Campus.Stavanger : Campus.National
+            });
+        });
+        console.log(departmentsArray)
+      return departmentsArray
+
+    } catch (error) {
+        console.error(error);
+    }
+}
 
   const searchCustomer = async (token: string, name?: string, email?: string) => {
     try {
@@ -536,6 +581,7 @@ const createCustomer = async (token: string, user: Partial<Models.Document>) => 
         createCustomer,
         getCustomerByExternalId,
         userCategories,
-        searchCustomer
+        searchCustomer, 
+        getDepartments
     };
 };

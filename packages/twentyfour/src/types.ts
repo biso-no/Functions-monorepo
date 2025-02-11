@@ -93,6 +93,20 @@ export interface Voucher {
     Sort: number;
     DifferenceOptions?: any; // TODO: Define DifferenceOptions type if needed
 }
+export enum Campus {
+    Bergen = 'Bergen',
+    Oslo = 'Oslo',
+    Stavanger = 'Stavanger',
+    Trondheim = 'Trondheim',
+    National = 'National',
+  }
+  
+export interface Department {
+    Id: string;
+    Name: string;
+    Campus: Campus;
+  }
+
 
 export interface Entry {
     SequenceId?: number;
