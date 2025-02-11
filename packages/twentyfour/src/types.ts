@@ -68,3 +68,229 @@ export interface Customer {
     Id: number;
     Name: string;
 }
+
+// Account Service Types
+export interface BundleList {
+    Bundles: Bundle[];
+    SaveOption: 0 | 1; // 0 = direct to ledger, 1 = save as journal (default)
+    DirectLedger: boolean; // default false
+    DefaultCustomerId: number;
+    AllowDifference: boolean; // default false
+    IgnoreWarnings?: string[]; // ['vatisnotinbalance', 'vatismissingfoundation', 'invoicealreadyexists', 'customermismatchbankaccount']
+}
+
+export interface Bundle {
+    YearId: number; // e.g., 2024
+    Vouchers: Voucher[];
+    Sort: number; // Entry type from GetTransactionTypes
+    Name: string;
+    BundleDirectAccounting: boolean; // false = auto VAT calc, true = no VAT calc
+}
+
+export interface Voucher {
+    TransactionNo: number;
+    Entries: Entry[];
+    Sort: number;
+    DifferenceOptions?: any; // TODO: Define DifferenceOptions type if needed
+}
+
+export interface Entry {
+    SequenceId?: number;
+    CustomerId?: number;
+    AccountNo: number;
+    Date: string;
+    DueDate?: string;
+    Amount: number; // positive for debit, negative for credit
+    CurrencyId?: string; // e.g., 'NOK', 'USD'
+    CurrencyRate?: number;
+    CurrencyUnit?: number; // default 1
+    DepartmentId?: number;
+    ProjectId?: number;
+    InvoiceReferenceNo?: string;
+    InvoiceOcr?: string;
+    TaxNo?: number;
+    PeriodDate?: string;
+    Comment?: string;
+    StampNo?: number;
+    BankAccountNo?: string;
+    LinkId?: string; // GUID
+    Links?: string[]; // Array of LinkIds
+    LineId?: string; // For linking to existing entries
+}
+
+export interface EntryItem {
+    LineId: string; // GUID
+    DueDate: string;
+}
+
+export interface LinkEntryItem {
+    LineIds: string[]; // Array of GUIDs
+    LinkId: number;
+}
+
+export interface AccountData {
+    AccountId: number;
+    AccountNo: number;
+    AccountName: string;
+    AccountTax: number;
+    TaxNo: number;
+}
+
+export enum AccountDataError {
+    OK = 'OK',
+    AccountDontExist = 'AccountDontExist',
+    NameDontMatch = 'NameDontMatch'
+}
+
+export interface TypeData {
+    TypeId: number;
+    TypeNo: number;
+    Title: string;
+    EntrySeriesID: number;
+}
+
+export interface TaxMappingList {
+    GroupId: string; // GUID
+    Name: string;
+    Description: string;
+    IsTemplate: boolean;
+    ElementList: TaxMappingElement[];
+}
+
+export interface TaxMappingElement {
+    Symbol: string;
+    TaxNo: number;
+}
+
+export interface TaxCodeElement {
+    TaxId: number;
+    TaxNo: string;
+    TaxName: string;
+    TaxRate: number;
+    AccountNo: number;
+}
+
+export enum SaveBundleListResultType {
+    Ok = 'Ok',
+    DuplicateData = 'DuplicateData',
+    DataAlreadySaved = 'DataAlreadySaved',
+    NotAuthenticated = 'NotAuthenticated',
+    SystemError = 'SystemError',
+    Exception = 'Exception',
+    NotSaved = 'NotSaved'
+}
+
+export interface SaveBundleListResult {
+    Type: SaveBundleListResultType;
+    Description: string;
+}
+
+export interface GetEntryIdResult {
+    Date: string;
+    SortNo: number;
+    EntryNo: number;
+}
+
+export interface ArgEntryId {
+    Date: string;
+    SortNo: number;
+    EntryNo: number;
+}
+
+// Attachment Service Types
+export interface ImageFile {
+    Id: number;
+    Type: FileType;
+    StampNo?: number; // Read only
+    StampMeta?: KeyValuePair[]; // Read only
+    FrameInfo?: ImageFrameInfo[];
+    ContactId?: number[]; // Read only
+}
+
+export enum FileType {
+    Unknown = 'Unknown',
+    WMF = 'WMF',
+    PNG = 'PNG',
+    TIFF = 'TIFF',
+    BMP = 'BMP',
+    GIF = 'GIF',
+    JPEG = 'JPEG'
+}
+
+export interface KeyValuePair {
+    Key: string;
+    Value: string;
+}
+
+export enum FileLocation {
+    Retrieval = 'Retrieval',
+    Scanning = 'Scanning', // Not implemented
+    Journal = 'Journal'
+}
+
+export interface ImageFrameInfo {
+    Id: number; // Should be 1
+    Uri?: string; // Not in use
+    StampNo: number;
+    MetaData?: MetaData[];
+    Status: number; // Not in use, set to 0
+}
+
+export interface MetaData {
+    Amount?: number;
+    Comment?: string;
+    Credit?: number;
+    CurrencySymbol?: string;
+    CustomerName?: string;
+    CustomerNo?: string;
+    Debit?: number;
+    Dimensions?: string;
+    DocumentFormat?: string;
+    InvoiceBankAccountNo?: string;
+    InvoiceDate?: string;
+    InvoiceDueDate?: string;
+    InvoiceNo?: string;
+    InvoiceOCR?: string;
+    TransactionTypeNo?: string;
+    Type?: string;
+    PageNo?: number;
+}
+
+export interface FileInfoParameters {
+    StampNo?: number[];
+    FileId?: number[];
+    AttachmentRegisteredAfter?: string;
+    AttachmentChangedAfter?: string;
+    HasStampNo?: boolean;
+    FileApproved?: boolean;
+    AttachmentStatus?: FlagType[];
+}
+
+export enum FlagType {
+    None = 'None',
+    Assigned = 'Assigned',
+    Approved = 'Approved',
+    Declined = 'Declined',
+    Archived = 'Archived',
+    Distributed = 'Distributed',
+    PrepostedInJournal = 'PrepostedInJournal',
+    PostedInJournal = 'PostedInJournal'
+}
+
+// Attachment Service Response Types
+export interface StampSeries {
+    Id: string; // guid
+    Name: string;
+    Start: number;
+    End: number;
+}
+
+export interface GetSeriesResult {
+    StampSeries: StampSeries[];
+}
+
+export interface GetFileInfoResult {
+    ImageFile: ImageFile[];
+}
+
+export interface CreateResult extends ImageFile {}
