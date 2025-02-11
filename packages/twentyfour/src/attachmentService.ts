@@ -4,9 +4,10 @@ import { parseStringPromise } from 'xml2js';
 import { 
     FileType,
     FileLocation,
+    FlagType,
     ImageFile,
     FileInfoParameters,
-    MetaData,
+    MetaDataFields,
     ImageFrameInfo,
     KeyValuePair,
     CreateResult,
@@ -17,19 +18,101 @@ import {
 
 const ATTACHMENT_SERVICE_URL = 'https://webservices.24sevenoffice.com/Economy/Accounting/Accounting_V001/AttachmentService.asmx';
 
-export enum FlagType {
-    None = 'None',
-    Assigned = 'Assigned',
-    Approved = 'Approved',
-    Declined = 'Declined',
-    Archived = 'Archived',
-    Distributed = 'Distributed',
-    PrepostedInJournal = 'PrepostedInJournal',
-    PostedInJournal = 'PostedInJournal'
+const CHUNK_SIZE = 1024 * 1024; // 1MB chunks
+
+interface UploadAttachmentOptions {
+    fileType: FileType;
+    fileBuffer: Buffer;
+    invoiceOcr?: string;
+    pageNo?: number;
+    customMetadata?: KeyValuePair[];
 }
 
 export const attachmentService = (error: (msg: any) => void, log: (msg: any) => void) => {
     const { getAccessToken } = soapClient(error, log);
+
+    /**
+     * Converts MetaDataFields to KeyValuePair array
+     */
+    function convertMetaDataToKeyValuePairs(metadata: MetaDataFields): KeyValuePair[] {
+        return Object.entries(metadata)
+            .filter(([_, value]) => value !== undefined)
+            .map(([key, value]) => ({
+                Key: key,
+                Value: value.toString()
+            }));
+    }
+
+    /**
+     * Uploads an attachment following the complete flow:
+     * 1. Creates a ghost file
+     * 2. Uploads the file in chunks
+     * 3. Gets a stamp number
+     * 4. Saves the file with metadata
+     */
+    async function uploadAttachment(token: string, options: UploadAttachmentOptions): Promise<number> {
+        try {
+            // Step 1: Create ghost file
+            log('Creating ghost file...');
+            const createResult = await create(token, options.fileType);
+            const fileId = createResult.Id;
+
+            // Step 2: Upload file in chunks
+            log('Uploading file chunks...');
+            const totalChunks = Math.ceil(options.fileBuffer.length / CHUNK_SIZE);
+            for (let i = 0; i < totalChunks; i++) {
+                const start = i * CHUNK_SIZE;
+                const end = Math.min(start + CHUNK_SIZE, options.fileBuffer.length);
+                const chunk = options.fileBuffer.slice(start, end);
+                const base64Chunk = chunk.toString('base64');
+
+                await appendChunk(token, {
+                    Id: fileId,
+                    Type: options.fileType
+                }, base64Chunk, start);
+
+                log(`Uploaded chunk ${i + 1}/${totalChunks}`);
+            }
+
+            // Step 3: Get stamp number
+            log('Getting stamp number...');
+            const stampNo = await getStampNo(token);
+
+            // Step 4: Save file with metadata
+            log('Saving file with metadata...');
+            const metadata: KeyValuePair[] = [
+                ...(options.pageNo ? [{
+                    Key: 'PageNo',
+                    Value: options.pageNo.toString()
+                }] : []),
+                ...(options.invoiceOcr ? [{
+                    Key: 'InvoiceOCR',
+                    Value: options.invoiceOcr
+                }] : []),
+                ...(options.customMetadata || [])
+            ];
+
+            const file: ImageFile = {
+                Id: fileId,
+                Type: options.fileType,
+                FrameInfo: [{
+                    Id: 1,
+                    StampNo: stampNo,
+                    Status: 0,
+                    MetaData: metadata
+                }]
+            };
+
+            await save(token, file, FileLocation.Retrieval);
+            log('File upload completed successfully');
+            
+            return stampNo;
+        } catch (err) {
+            error('Error uploading attachment:');
+            error(err);
+            throw err;
+        }
+    }
 
     async function appendChunk(token: string, file: ImageFile, buffer: string, offset: number): Promise<void> {
         const body = `<?xml version="1.0" encoding="utf-8"?>
@@ -213,20 +296,26 @@ export const attachmentService = (error: (msg: any) => void, log: (msg: any) => 
     // Helper functions
     function generateFileInfoXml(file: ImageFile): string {
         const stampMetaXml = file.StampMeta ? 
-            `<StampMeta>${file.StampMeta.map(meta => 
-                `<KeyValuePair><Key>${meta.Key}</Key><Value>${meta.Value}</Value></KeyValuePair>`
-            ).join('')}</StampMeta>` : '';
+            `<StampMeta>${generateKeyValuePairXml(file.StampMeta)}</StampMeta>` : '';
 
         const frameInfoXml = file.FrameInfo ? 
-            `<FrameInfo>${file.FrameInfo.map(frame => 
-                `<ImageFrameInfo>
-                    <Id>${frame.Id}</Id>
-                    <Uri>${frame.Uri}</Uri>
+            `<FrameInfo>${file.FrameInfo.map(frame => {
+                const metaDataXml = frame.MetaData?.length 
+                    ? `<MetaData>${frame.MetaData.map(meta => 
+                        Object.entries(meta)
+                            .filter(([_, value]) => value !== undefined)
+                            .map(([key, value]) => `<${key}>${value}</${key}>`)
+                            .join('')
+                    ).join('')}</MetaData>`
+                    : '<MetaData xsi:nil="true" />';
+
+                return `<ImageFrameInfo>
+                    <Id>1</Id>
                     <StampNo>${frame.StampNo}</StampNo>
-                    <MetaData xsi:nil="true" />
-                    <Status>${frame.Status}</Status>
-                </ImageFrameInfo>`
-            ).join('')}</FrameInfo>` : '';
+                    ${metaDataXml}
+                    <Status>0</Status>
+                </ImageFrameInfo>`;
+            }).join('')}</FrameInfo>` : '';
 
         const contactIdXml = file.ContactId ? 
             `<ContactId>${file.ContactId.map(id => `<int>${id}</int>`).join('')}</ContactId>` : '';
@@ -234,11 +323,17 @@ export const attachmentService = (error: (msg: any) => void, log: (msg: any) => 
         return `
             <Id>${file.Id}</Id>
             <Type>${file.Type}</Type>
-            <StampNo>${file.StampNo}</StampNo>
+            ${file.StampNo ? `<StampNo>${file.StampNo}</StampNo>` : ''}
             ${stampMetaXml}
             ${frameInfoXml}
             ${contactIdXml}
         `;
+    }
+
+    function generateKeyValuePairXml(pairs: KeyValuePair[]): string {
+        return pairs.map(pair => 
+            `<KeyValuePair><Key>${pair.Key}</Key><Value>${pair.Value}</Value></KeyValuePair>`
+        ).join('');
     }
 
     function generateFileInfoParametersXml(parameters: FileInfoParameters): string {
@@ -286,6 +381,7 @@ export const attachmentService = (error: (msg: any) => void, log: (msg: any) => 
     }
 
     return {
+        uploadAttachment,
         appendChunk,
         appendChunkByLength,
         create,

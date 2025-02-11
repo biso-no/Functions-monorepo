@@ -198,13 +198,24 @@ export interface ArgEntryId {
 }
 
 // Attachment Service Types
+/**
+ * Key-value pair for metadata
+ */
+export interface KeyValuePair {
+    Key: string;
+    Value: string;
+}
+
+/**
+ * Image file in 24SevenOffice
+ */
 export interface ImageFile {
-    Id: number;
-    Type: FileType;
-    StampNo?: number; // Read only
-    StampMeta?: KeyValuePair[]; // Read only
-    FrameInfo?: ImageFrameInfo[];
-    ContactId?: number[]; // Read only
+    Id: number;                      // Set by response from Create
+    Type: FileType;                  // Enum of supported file types
+    StampNo?: number;               // Read only, not used when saving
+    StampMeta?: KeyValuePair[];     // Read only, not used when saving
+    FrameInfo?: ImageFrameInfo[];   
+    ContactId?: number[];           // Read only, lists approvers
 }
 
 export enum FileType {
@@ -217,33 +228,43 @@ export enum FileType {
     JPEG = 'JPEG'
 }
 
-export interface KeyValuePair {
-    Key: string;
-    Value: string;
-}
-
+/**
+ * File location in 24SevenOffice.
+ * - Retrieval: Image will show up in the inbox in the Retrieval Module
+ * - Journal: Image is posted directly as journal data (skips inbox)
+ * - Scanning: NOT IMPLEMENTED - DO NOT USE
+ */
 export enum FileLocation {
     Retrieval = 'Retrieval',
-    Scanning = 'Scanning', // Not implemented
+    Scanning = 'Scanning',  // Not implemented and may not be used
     Journal = 'Journal'
 }
 
+/**
+ * Frame information for an image file.
+ */
 export interface ImageFrameInfo {
-    Id: number; // Should be 1
-    Uri?: string; // Not in use
-    StampNo: number;
-    MetaData?: MetaData[];
-    Status: number; // Not in use, set to 0
+    Id: number;              // Must be set to 1
+    Uri?: never;            // Not in use - should never be set
+    StampNo: number;        // Current or new stamp number from GetStampNo
+    MetaData?: KeyValuePair[];  // Changed from MetaData[] to KeyValuePair[]
+    Status: number;         // Not in use - must be set to 0
 }
 
-export interface MetaData {
-    Amount?: number;
+/**
+ * Metadata fields for attachment files in 24SevenOffice.
+ * Note: These fields are only used when location is set to Retrieval.
+ * They populate corresponding fields in the Retrieval Module.
+ * Meta data is not automatically populated if you also specify a StampNo.
+ */
+export interface MetaDataFields {
+    Amount?: string;
     Comment?: string;
-    Credit?: number;
+    Credit?: string;
     CurrencySymbol?: string;
     CustomerName?: string;
     CustomerNo?: string;
-    Debit?: number;
+    Debit?: string;
     Dimensions?: string;
     DocumentFormat?: string;
     InvoiceBankAccountNo?: string;
@@ -253,7 +274,7 @@ export interface MetaData {
     InvoiceOCR?: string;
     TransactionTypeNo?: string;
     Type?: string;
-    PageNo?: number;
+    PageNo?: string;
 }
 
 export interface FileInfoParameters {
