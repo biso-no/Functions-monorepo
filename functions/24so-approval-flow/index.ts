@@ -289,7 +289,7 @@ export default async ({ req, res, log, error }: Context) => {
                 { Key: 'CustomerNo', Value: customerId },
                 { Key: 'InvoiceOCR', Value: expense.invoice_id.toString() },
                 { Key: 'Amount', Value: expense.total.toString() },
-                { Key: 'Credit', Value: '7610' },
+                { Key: 'Credit', Value: '6310' },
                 { Key: 'Debit', Value: '2400' },
                 { Key: 'InvoiceDate', Value: expense.created_at },
                 { Key: 'BankAccountNo', Value: expense.bank_account },
