@@ -210,7 +210,8 @@ export default async ({ req, res, log, error }: Context) => {
     log('Starting approval flow');
     log(req.body);
     try {
-        const expenseId = req.body.$id;
+        const invoiceId = req.$id; // This is the file ID from storage event
+        const expenseId = invoiceId.replace('invoice_', ''); // Assuming the file ID format
         if (!expenseId) {
             throw new ValidationError('Expense ID is required');
         }
