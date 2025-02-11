@@ -236,6 +236,42 @@ export const soapClient = (error: (msg: any) => void, log: (msg: any) => void) =
       }
   };
 
+  const searchCustomer = async (token: string, name?: string, email?: string) => {
+    try {
+      const body = `<?xml version="1.0" encoding="utf-8"?>
+<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">
+  <soap12:Body>
+    <GetCompanies xmlns="http://24sevenOffice.com/webservices">
+      <searchParams>
+        <CompanyName>${name}</CompanyName>
+      </searchParams>
+      <returnProperties>
+        <string>Id</string>
+      </returnProperties>
+    </GetCompanies>
+  </soap12:Body>
+</soap12:Envelope>`;
+
+      const response = await axios.post('https://api.24sevenoffice.com/CRM/Company/V001/CompanyService.asmx', body, {
+        headers: {
+          'Content-Type': 'application/soap+xml; charset=utf-8',
+          'Cookie': 'ASP.NET_SessionId=' + token
+        }
+      });
+
+      const parsedResponse = await parseStringPromise(response.data, {
+        explicitArray: false,
+        ignoreAttrs: true
+      });
+
+      return parsedResponse['soap:Envelope']['soap:Body']['GetCompaniesResponse']['GetCompaniesResult']['Company'];
+
+    } catch (error) {
+      log('Error during customer search: ' + error);
+      throw error;
+    }
+  };
+
   const userCategories = async (token: string, studentId: number) => {
     try {
         const body = `<?xml version="1.0" encoding="utf-8"?>
@@ -499,6 +535,7 @@ const createCustomer = async (token: string, user: Partial<Models.Document>) => 
         getCustomer,
         createCustomer,
         getCustomerByExternalId,
-        userCategories
+        userCategories,
+        searchCustomer
     };
 };
