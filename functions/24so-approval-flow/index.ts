@@ -217,8 +217,8 @@ export default async ({ req, res, log, error }: Context) => {
 
         // Get expense details from database with relationships expanded
         const expense = await databases.getDocument<Expense>(
-            'main',
-            'expenses',
+            'app',
+            'expense',
             expenseId,
             [
                 'user',
@@ -348,8 +348,8 @@ export default async ({ req, res, log, error }: Context) => {
 
         // Update expense status in database
         await databases.updateDocument(
-            'main',
-            'expenses',
+            'app',
+            'expense',
             expenseId,
             {
                 status: 'approved',
