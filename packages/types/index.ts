@@ -12,4 +12,21 @@ export interface ExchangeRateResponse {
     date: string;     
     rates: Record<string, number>; 
 }
+
+
+export interface Product {
+    id: number;
+    name: string;
+    campus: { value: string; label: string };
+    department: { value: string; label: string };
+    images: string[];
+    price: string;
+    sale_price: string;
+    description: string;
+    url: string;
+  }
+  
+  export interface ResponseData {
+    products: Product[];
+  }
   
