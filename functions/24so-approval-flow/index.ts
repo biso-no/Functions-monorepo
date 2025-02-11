@@ -221,10 +221,6 @@ export default async ({ req, res, log, error }: Context) => {
             'app',
             'expense',
             expenseId,
-            [
-                'user',
-                'expenseAttachments'
-            ]
         );
 
         if (!expense.invoice_id) {
