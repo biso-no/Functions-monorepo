@@ -1,21 +1,28 @@
-import { Client, Databases, Storage } from 'node-appwrite';
-import { Context } from '@biso/types';
-import { createAdminClient } from '@biso/appwrite';
+import { Context } from "@biso/types";
 
+// This is your Appwrite function
+// It's executed each time we get a request
 export default async ({ req, res, log, error }: Context) => {
   try {
-    // Initialize Appwrite client
 
-    const {databases} = await createAdminClient();
+    if (req.method !== 'GET') {
+      res.json({ error: 'Method not allowed' });
+      return;
+    }
 
-    log(req)
 
-    return res.json({
-      status: 'ok',
-    });
+    const { membershipId, userId, secret, teamId } = req.query;
 
-  } catch (err: any) {
-    error(err.message || err);
-    return res.json({ error: err.message || err });
+    if (!membershipId || !userId || !secret || !teamId) {
+      res.json({ error: 'Missing parameters' });
+      return;
+    }
+
+    const url = `biso://chat/invite?membershipId=${membershipId}&userId=${userId}&secret=${secret}&teamId=${teamId}`;
+    return res.redirect(url);
+  } catch (error) {
+    log(error);
+    return res.json({ status: 'unsuccessful' });
   }
-}
+};
+    
