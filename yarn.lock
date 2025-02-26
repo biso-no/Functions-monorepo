@@ -2,17 +2,1114 @@
 # yarn lockfile v1
 
 
-bun-types@latest:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/bun-types/-/bun-types-0.5.0.tgz#1f2e98ac0cf91d9c7b556d221cc736fc8bd04277"
-  integrity sha512-W74XkTKdOP2HV1PbzL7k6+8TZlcJyj1IuD7y9wX2SiHIaVjlqVwM9fXgsCvTlQQqkkkyZxSPSDFF10J6qml2eA==
+"@azure/abort-controller@^2.0.0":
+  version "2.1.2"
+  resolved "https://registry.npmjs.org/@azure/abort-controller/-/abort-controller-2.1.2.tgz"
+  integrity sha512-nBrLsEWm4J2u5LpAPjxADTlq3trDgVZZXHNKabeXZtpq3d3AbN/KGO82R87rdDz5/lYB024rtEf10/q0urNgsA==
+  dependencies:
+    tslib "^2.6.2"
 
-zod@1:
+"@azure/core-auth@^1.4.0", "@azure/core-auth@^1.8.0", "@azure/core-auth@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.npmjs.org/@azure/core-auth/-/core-auth-1.9.0.tgz"
+  integrity sha512-FPwHpZywuyasDSLMqJ6fhbOK3TqUdviZNF8OqRGA4W5Ewib2lEEZ+pBsYcBa88B2NGO/SEnYPGhyBqNlE8ilSw==
+  dependencies:
+    "@azure/abort-controller" "^2.0.0"
+    "@azure/core-util" "^1.11.0"
+    tslib "^2.6.2"
+
+"@azure/core-client@^1.9.2":
+  version "1.9.2"
+  resolved "https://registry.npmjs.org/@azure/core-client/-/core-client-1.9.2.tgz"
+  integrity sha512-kRdry/rav3fUKHl/aDLd/pDLcB+4pOFwPPTVEExuMyaI5r+JBbMWqRbCY1pn5BniDaU3lRxO9eaQ1AmSMehl/w==
+  dependencies:
+    "@azure/abort-controller" "^2.0.0"
+    "@azure/core-auth" "^1.4.0"
+    "@azure/core-rest-pipeline" "^1.9.1"
+    "@azure/core-tracing" "^1.0.0"
+    "@azure/core-util" "^1.6.1"
+    "@azure/logger" "^1.0.0"
+    tslib "^2.6.2"
+
+"@azure/core-rest-pipeline@^1.17.0", "@azure/core-rest-pipeline@^1.9.1":
+  version "1.19.0"
+  resolved "https://registry.npmjs.org/@azure/core-rest-pipeline/-/core-rest-pipeline-1.19.0.tgz"
+  integrity sha512-bM3308LRyg5g7r3Twprtqww0R/r7+GyVxj4BafcmVPo4WQoGt5JXuaqxHEFjw2o3rvFZcUPiqJMg6WuvEEeVUA==
+  dependencies:
+    "@azure/abort-controller" "^2.0.0"
+    "@azure/core-auth" "^1.8.0"
+    "@azure/core-tracing" "^1.0.1"
+    "@azure/core-util" "^1.11.0"
+    "@azure/logger" "^1.0.0"
+    http-proxy-agent "^7.0.0"
+    https-proxy-agent "^7.0.0"
+    tslib "^2.6.2"
+
+"@azure/core-tracing@^1.0.0", "@azure/core-tracing@^1.0.1":
+  version "1.2.0"
+  resolved "https://registry.npmjs.org/@azure/core-tracing/-/core-tracing-1.2.0.tgz"
+  integrity sha512-UKTiEJPkWcESPYJz3X5uKRYyOcJD+4nYph+KpfdPRnQJVrZfk0KJgdnaAWKfhsBBtAf/D58Az4AvCJEmWgIBAg==
+  dependencies:
+    tslib "^2.6.2"
+
+"@azure/core-util@^1.11.0", "@azure/core-util@^1.6.1":
+  version "1.11.0"
+  resolved "https://registry.npmjs.org/@azure/core-util/-/core-util-1.11.0.tgz"
+  integrity sha512-DxOSLua+NdpWoSqULhjDyAZTXFdP/LKkqtYuxxz1SCN289zk3OG8UOpnCQAz/tygyACBtWp/BoO72ptK7msY8g==
+  dependencies:
+    "@azure/abort-controller" "^2.0.0"
+    tslib "^2.6.2"
+
+"@azure/identity@^4.0.1":
+  version "4.7.0"
+  resolved "https://registry.npmjs.org/@azure/identity/-/identity-4.7.0.tgz"
+  integrity sha512-6z/S2KorkbKaZ0DgZFVRdu7RCuATmMSTjKpuhj7YpjxkJ0vnJ7kTM3cpNgzFgk9OPYfZ31wrBEtC/iwAS4jQDA==
+  dependencies:
+    "@azure/abort-controller" "^2.0.0"
+    "@azure/core-auth" "^1.9.0"
+    "@azure/core-client" "^1.9.2"
+    "@azure/core-rest-pipeline" "^1.17.0"
+    "@azure/core-tracing" "^1.0.0"
+    "@azure/core-util" "^1.11.0"
+    "@azure/logger" "^1.0.0"
+    "@azure/msal-browser" "^4.2.0"
+    "@azure/msal-node" "^3.2.1"
+    events "^3.0.0"
+    jws "^4.0.0"
+    open "^10.1.0"
+    stoppable "^1.1.0"
+    tslib "^2.2.0"
+
+"@azure/logger@^1.0.0":
+  version "1.1.4"
+  resolved "https://registry.npmjs.org/@azure/logger/-/logger-1.1.4.tgz"
+  integrity sha512-4IXXzcCdLdlXuCG+8UKEwLA1T1NHqUfanhXYHiQTn+6sfWCZXduqbtXDGceg3Ce5QxTGo7EqmbV6Bi+aqKuClQ==
+  dependencies:
+    tslib "^2.6.2"
+
+"@azure/msal-browser@^4.2.0":
+  version "4.5.0"
+  resolved "https://registry.npmjs.org/@azure/msal-browser/-/msal-browser-4.5.0.tgz"
+  integrity sha512-H7mWmu8yI0n0XxhJobrgncXI6IU5h8DKMiWDHL5y+Dc58cdg26GbmaMUehbUkdKAQV2OTiFa4FUa6Fdu/wIxBg==
+  dependencies:
+    "@azure/msal-common" "15.2.0"
+
+"@azure/msal-common@15.2.0":
+  version "15.2.0"
+  resolved "https://registry.npmjs.org/@azure/msal-common/-/msal-common-15.2.0.tgz"
+  integrity sha512-HiYfGAKthisUYqHG1nImCf/uzcyS31wng3o+CycWLIM9chnYJ9Lk6jZ30Y6YiYYpTQ9+z/FGUpiKKekd3Arc0A==
+
+"@azure/msal-node@^3.2.1":
+  version "3.2.3"
+  resolved "https://registry.npmjs.org/@azure/msal-node/-/msal-node-3.2.3.tgz"
+  integrity sha512-0eaPqBIWEAizeYiXdeHb09Iq0tvHJ17ztvNEaLdr/KcJJhJxbpkkEQf09DB+vKlFE0tzYi7j4rYLTXtES/InEQ==
+  dependencies:
+    "@azure/msal-common" "15.2.0"
+    jsonwebtoken "^9.0.0"
+    uuid "^8.3.0"
+
+"@babel/runtime@^7.12.5":
+  version "7.26.9"
+  dependencies:
+    regenerator-runtime "^0.14.0"
+
+"@biso/24so-approval-flow@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/24so-approval-flow":
+  version "0.0.1"
+  resolved "file:functions/24so-approval-flow"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/twentyfour" "0.0.1"
+    "@biso/types" "0.0.1"
+    bun-types latest
+    canvas "^3.1.0"
+    pdfjs-dist "^4.10.38"
+    zod "1"
+
+"@biso/24so-create-order-from-shop@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/create-membership-from-shop":
+  version "0.0.1"
+  resolved "file:functions/create-membership-from-shop"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/twentyfour" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/24so-create-order@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/24so-create-order":
+  version "0.0.1"
+  resolved "file:functions/24so-create-order"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/twentyfour" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/24so-get-departments@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/24s0-get-departments":
+  version "0.0.1"
+  resolved "file:functions/24s0-get-departments"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/twentyfour" "0.0.1"
+    "@biso/types" "0.0.1"
+    bun-types latest
+    canvas "^3.1.0"
+    pdfjs-dist "^4.10.38"
+    zod "1"
+
+"@biso/appwrite@0.0.1", "@biso/appwrite@file:/Users/heien/Documents/Dev/Functions-monorepo/packages/appwrite":
+  version "0.0.1"
+  resolved "file:packages/appwrite"
+  dependencies:
+    bun-types latest
+    node-appwrite "^14.1.0"
+    zod "1"
+
+"@biso/create-chat-group@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/create-chat-group":
+  version "0.0.1"
+  resolved "file:functions/create-chat-group"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/create-event@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/create-event":
+  version "0.0.1"
+  resolved "file:functions/create-event"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/create-post@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/create-post":
+  version "0.0.1"
+  resolved "file:functions/create-post"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/create-user-doc@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/create-user-doc":
+  version "0.0.1"
+  resolved "file:functions/create-user-doc"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/election-vote@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/election-vote":
+  version "0.0.1"
+  resolved "file:functions/election-vote"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/extract-pdf@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/extract-pdf":
+  version "0.0.1"
+  resolved "file:functions/extract-pdf"
+  dependencies:
+    "@biso/utils" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/get-board-members@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/get-board-members":
+  version "0.0.1"
+  resolved "file:functions/get-board-members"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/utils" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/insta-posts-by-hashtag@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/get-instagram-posts-by-hashtag":
+  version "0.0.1"
+  resolved "file:functions/get-instagram-posts-by-hashtag"
+  dependencies:
+    "@biso/instagram" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/instagram@0.0.1", "@biso/instagram@file:/Users/heien/Documents/Dev/Functions-monorepo/packages/instagram":
+  version "0.0.1"
+  resolved "file:packages/instagram"
+  dependencies:
+    bun-types latest
+    facebook-nodejs-business-sdk "^20.0.0"
+    zod "3"
+
+"@biso/process-receipts@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/process-receipts":
+  version "0.0.1"
+  resolved "file:functions/process-receipts"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/twentyfour" "0.0.1"
+    "@biso/types" "0.0.1"
+    bun-types latest
+    canvas "^3.1.0"
+    pdfjs-dist "^4.10.38"
+    zod "1"
+
+"@biso/sync-webshop@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/sync-webshop":
+  version "0.0.1"
+  resolved "file:functions/sync-webshop"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/twentyfour" "0.0.1"
+    "@biso/types" "0.0.1"
+    bun-types latest
+    canvas "^3.1.0"
+    pdfjs-dist "^4.10.38"
+    zod "1"
+
+"@biso/twentyfour@0.0.1", "@biso/twentyfour@file:/Users/heien/Documents/Dev/Functions-monorepo/packages/twentyfour":
+  version "0.0.1"
+  resolved "file:packages/twentyfour"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    bun-types latest
+    zod "3"
+
+"@biso/types@0.0.1", "@biso/types@file:/Users/heien/Documents/Dev/Functions-monorepo/packages/types":
+  version "0.0.1"
+  resolved "file:packages/types"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@vippsmobilepay/sdk" "^1.3.1"
+    bun-types latest
+    zod "3"
+
+"@biso/utils@0.0.1", "@biso/utils@file:/Users/heien/Documents/Dev/Functions-monorepo/packages/utils":
+  version "0.0.1"
+  resolved "file:packages/utils"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    bun-types latest
+    pdf.js-extract "^0.2.1"
+    zod "3"
+
+"@biso/verify-biso-membership@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/verify-biso-membership":
+  version "0.0.1"
+  resolved "file:functions/verify-biso-membership"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/utils" "0.0.1"
+    "@biso/vipps" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/vipps-callback@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/vipps-callback":
+  version "0.0.1"
+  resolved "file:functions/vipps-callback"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/utils" "0.0.1"
+    "@biso/vipps" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/vipps-payment@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/vipps-payment":
+  version "0.0.1"
+  resolved "file:functions/vipps-payment"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@biso/utils" "0.0.1"
+    "@biso/vipps" "0.0.1"
+    bun-types latest
+    zod "1"
+
+"@biso/vipps@0.0.1", "@biso/vipps@file:/Users/heien/Documents/Dev/Functions-monorepo/packages/vipps":
+  version "0.0.1"
+  resolved "file:packages/vipps"
+  dependencies:
+    "@biso/appwrite" "0.0.1"
+    "@vippsmobilepay/sdk" "^1.3.1"
+    bun-types latest
+    zod "3"
+
+"@biso/webshop-product@file:/Users/heien/Documents/Dev/Functions-monorepo/functions/webshop-product":
+  version "0.0.1"
+  resolved "file:functions/webshop-product"
+  dependencies:
+    bun-types latest
+    zod "1"
+
+"@functions-monorepo/m365@file:/Users/heien/Documents/Dev/Functions-monorepo/packages/m365":
+  version "1.0.0"
+  resolved "file:packages/m365"
+  dependencies:
+    "@azure/identity" "^4.0.1"
+    "@microsoft/microsoft-graph-client" "^3.0.7"
+
+"@img/sharp-darwin-arm64@0.33.5":
+  version "0.33.5"
+  optionalDependencies:
+    "@img/sharp-libvips-darwin-arm64" "1.0.4"
+
+"@img/sharp-libvips-darwin-arm64@1.0.4":
+  version "1.0.4"
+
+"@microsoft/microsoft-graph-client@^3.0.7":
+  version "3.0.7"
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    tslib "^2.2.0"
+
+"@napi-rs/canvas-darwin-arm64@0.1.67":
+  version "0.1.67"
+
+"@napi-rs/canvas@^0.1.65":
+  version "0.1.67"
+  optionalDependencies:
+    "@napi-rs/canvas-android-arm64" "0.1.67"
+    "@napi-rs/canvas-darwin-arm64" "0.1.67"
+    "@napi-rs/canvas-darwin-x64" "0.1.67"
+    "@napi-rs/canvas-linux-arm-gnueabihf" "0.1.67"
+    "@napi-rs/canvas-linux-arm64-gnu" "0.1.67"
+    "@napi-rs/canvas-linux-arm64-musl" "0.1.67"
+    "@napi-rs/canvas-linux-riscv64-gnu" "0.1.67"
+    "@napi-rs/canvas-linux-x64-gnu" "0.1.67"
+    "@napi-rs/canvas-linux-x64-musl" "0.1.67"
+    "@napi-rs/canvas-win32-x64-msvc" "0.1.67"
+
+"@pdf-lib/standard-fonts@^1.0.0":
+  version "1.0.0"
+  dependencies:
+    pako "^1.0.6"
+
+"@pdf-lib/upng@^1.0.1":
+  version "1.0.1"
+  dependencies:
+    pako "^1.0.10"
+
+"@types/facebook-nodejs-business-sdk@^20.0.2":
+  version "20.0.2"
+
+"@types/node-fetch@^2.6.4":
+  version "2.6.12"
+  dependencies:
+    "@types/node" "*"
+    form-data "^4.0.0"
+
+"@types/node@*":
+  version "22.2.0"
+  dependencies:
+    undici-types "~6.13.0"
+
+"@types/node@^18.11.18":
+  version "18.19.75"
+  dependencies:
+    undici-types "~5.26.4"
+
+"@types/node@^20.11.0":
+  version "20.17.19"
+  resolved "https://registry.npmjs.org/@types/node/-/node-20.17.19.tgz"
+  integrity sha512-LEwC7o1ifqg/6r2gn9Dns0f1rhK+fPFDoMiceTJ6kWmVk6bgXBI/9IOWfVan4WiAavK9pIVWdX0/e3J+eEUh5A==
+  dependencies:
+    undici-types "~6.19.2"
+
+"@types/node@~20.12.8":
+  version "20.12.14"
+  dependencies:
+    undici-types "~5.26.4"
+
+"@types/ws@~8.5.10":
+  version "8.5.11"
+  dependencies:
+    "@types/node" "*"
+
+"@types/xml2js@^0.4.14":
+  version "0.4.14"
+  dependencies:
+    "@types/node" "*"
+
+"@vippsmobilepay/sdk@^1.3.1":
+  version "1.3.1"
+
+abort-controller@^3.0.0:
+  version "3.0.0"
+  dependencies:
+    event-target-shim "^5.0.0"
+
+agent-base@^7.1.0, agent-base@^7.1.2:
+  version "7.1.3"
+  resolved "https://registry.npmjs.org/agent-base/-/agent-base-7.1.3.tgz"
+  integrity sha512-jRR5wdylq8CkOe6hei19GGZnxM6rBGwFl3Bg0YItGDimvjGtAvdZk4Pu6Cl4u4Igsws4a1fd1Vq3ezrhn4KmFw==
+
+agentkeepalive@^4.2.1:
+  version "4.6.0"
+  dependencies:
+    humanize-ms "^1.2.1"
+
+array-parallel@~0.1.3:
+  version "0.1.3"
+
+array-series@~0.1.5:
+  version "0.1.5"
+
+asynckit@^0.4.0:
+  version "0.4.0"
+
+axios@^1.4.0:
+  version "1.7.3"
+  dependencies:
+    follow-redirects "^1.15.6"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
+
+axios@^1.7.9:
+  version "1.7.9"
+  dependencies:
+    follow-redirects "^1.15.6"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
+
+base64-js@^1.3.1:
+  version "1.5.1"
+
+bl@^4.0.3:
+  version "4.1.0"
+  dependencies:
+    buffer "^5.5.0"
+    inherits "^2.0.4"
+    readable-stream "^3.4.0"
+
+buffer-equal-constant-time@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/buffer-equal-constant-time/-/buffer-equal-constant-time-1.0.1.tgz"
+  integrity sha512-zRpUiDwd/xk6ADqPMATG8vc9VPrkck7T07OIx0gnjmJAnHnTVXNQG3vfvWNuiZIkwu9KrKdA1iJKfsfTVxE6NA==
+
+buffer@^5.5.0:
+  version "5.7.1"
+  dependencies:
+    base64-js "^1.3.1"
+    ieee754 "^1.1.13"
+
+bun-types@latest:
+  version "1.2.2"
+  dependencies:
+    "@types/node" "*"
+    "@types/ws" "~8.5.10"
+
+bundle-name@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.npmjs.org/bundle-name/-/bundle-name-4.1.0.tgz"
+  integrity sha512-tjwM5exMg6BGRI+kNmTntNsvdZS1X8BFYS6tnJ2hdH0kVxM6/eVZ2xy+FqStSWvYmtfFMDLIxurorHwDKfDz5Q==
+  dependencies:
+    run-applescript "^7.0.0"
+
+canvas@^3.1.0:
+  version "3.1.0"
+  dependencies:
+    node-addon-api "^7.0.0"
+    prebuild-install "^7.1.1"
+
+chownr@^1.1.1:
+  version "1.1.4"
+
+color-convert@^2.0.1:
+  version "2.0.1"
+  dependencies:
+    color-name "~1.1.4"
+
+color-name@^1.0.0, color-name@~1.1.4:
+  version "1.1.4"
+
+color-string@^1.9.0:
+  version "1.9.1"
+  dependencies:
+    color-name "^1.0.0"
+    simple-swizzle "^0.2.2"
+
+color@^4.2.3:
+  version "4.2.3"
+  dependencies:
+    color-convert "^2.0.1"
+    color-string "^1.9.0"
+
+combined-stream@^1.0.8:
+  version "1.0.8"
+  dependencies:
+    delayed-stream "~1.0.0"
+
+cross-spawn@^4.0.0:
+  version "4.0.2"
+  dependencies:
+    lru-cache "^4.0.1"
+    which "^1.2.9"
+
+currency-codes@^1.5.1:
+  version "1.5.1"
+  dependencies:
+    first-match "~0.0.1"
+    nub "~0.0.0"
+
+data-uri-to-buffer@^4.0.0:
+  version "4.0.1"
+
+debug@^3.1.0:
+  version "3.2.7"
+  dependencies:
+    ms "^2.1.1"
+
+debug@^4.3.4:
+  version "4.4.0"
+  resolved "https://registry.npmjs.org/debug/-/debug-4.4.0.tgz"
+  integrity sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==
+  dependencies:
+    ms "^2.1.3"
+
+debug@4:
+  version "4.4.0"
+  resolved "https://registry.npmjs.org/debug/-/debug-4.4.0.tgz"
+  integrity sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==
+  dependencies:
+    ms "^2.1.3"
+
+decompress-response@^6.0.0:
+  version "6.0.0"
+  dependencies:
+    mimic-response "^3.1.0"
+
+deep-extend@^0.6.0:
+  version "0.6.0"
+
+default-browser-id@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/default-browser-id/-/default-browser-id-5.0.0.tgz"
+  integrity sha512-A6p/pu/6fyBcA1TRz/GqWYPViplrftcW2gZC9q79ngNCKAeR/X3gcEdXQHl4KNXV+3wgIJ1CPkJQ3IHM6lcsyA==
+
+default-browser@^5.2.1:
+  version "5.2.1"
+  resolved "https://registry.npmjs.org/default-browser/-/default-browser-5.2.1.tgz"
+  integrity sha512-WY/3TUME0x3KPYdRRxEJJvXRHV4PyPoUsxtZa78lwItwRQRHhd2U9xOscaT/YTf8uCXIAjeJOFBVEh/7FtD8Xg==
+  dependencies:
+    bundle-name "^4.1.0"
+    default-browser-id "^5.0.0"
+
+define-lazy-prop@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/define-lazy-prop/-/define-lazy-prop-3.0.0.tgz"
+  integrity sha512-N+MeXYoqr3pOgn8xfyRPREN7gHakLYjhsHhWGT3fWAiL4IkAt0iDw14QiiEm2bE30c5XX5q0FtAA3CK5f9/BUg==
+
+delayed-stream@~1.0.0:
+  version "1.0.0"
+
+detect-libc@^2.0.0, detect-libc@^2.0.3:
+  version "2.0.3"
+
+dommatrix@0.0.24:
+  version "0.0.24"
+
+ecdsa-sig-formatter@1.0.11:
+  version "1.0.11"
+  resolved "https://registry.npmjs.org/ecdsa-sig-formatter/-/ecdsa-sig-formatter-1.0.11.tgz"
+  integrity sha512-nagl3RYrbNv6kQkeJIpt6NJZy8twLB/2vtz6yN9Z4vRKHN4/QZJIEbqohALSgwKdnksuY3k5Addp5lg8sVoVcQ==
+  dependencies:
+    safe-buffer "^5.0.1"
+
+end-of-stream@^1.1.0, end-of-stream@^1.4.1:
+  version "1.4.4"
+  dependencies:
+    once "^1.4.0"
+
+event-target-shim@^5.0.0:
+  version "5.0.1"
+
+events@^3.0.0:
+  version "3.3.0"
+  resolved "https://registry.npmjs.org/events/-/events-3.3.0.tgz"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
+expand-template@^2.0.3:
+  version "2.0.3"
+
+facebook-nodejs-business-sdk@^20.0.0:
+  version "20.0.1"
+  dependencies:
+    axios "^1.4.0"
+    currency-codes "^1.5.1"
+    iso-3166-1 "^2.1.1"
+    js-sha256 "^0.9.0"
+    mixwith "~0.1.1"
+
+fetch-blob@^3.1.2, fetch-blob@^3.1.4:
+  version "3.2.0"
+  dependencies:
+    node-domexception "^1.0.0"
+    web-streams-polyfill "^3.0.3"
+
+first-match@~0.0.1:
+  version "0.0.1"
+
+follow-redirects@^1.15.6:
+  version "1.15.6"
+
+form-data-encoder@1.7.2:
+  version "1.7.2"
+
+form-data@^4.0.0:
+  version "4.0.0"
+  dependencies:
+    asynckit "^0.4.0"
+    combined-stream "^1.0.8"
+    mime-types "^2.1.12"
+
+formdata-node@^4.3.2:
+  version "4.4.1"
+  dependencies:
+    node-domexception "1.0.0"
+    web-streams-polyfill "4.0.0-beta.3"
+
+formdata-polyfill@^4.0.10:
+  version "4.0.10"
+  dependencies:
+    fetch-blob "^3.1.2"
+
+fs-constants@^1.0.0:
+  version "1.0.0"
+
+github-from-package@0.0.0:
+  version "0.0.0"
+
+gm@^1.25.0:
+  version "1.25.0"
+  dependencies:
+    array-parallel "~0.1.3"
+    array-series "~0.1.5"
+    cross-spawn "^4.0.0"
+    debug "^3.1.0"
+
+http-proxy-agent@^7.0.0:
+  version "7.0.2"
+  resolved "https://registry.npmjs.org/http-proxy-agent/-/http-proxy-agent-7.0.2.tgz"
+  integrity sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==
+  dependencies:
+    agent-base "^7.1.0"
+    debug "^4.3.4"
+
+https-proxy-agent@^7.0.0:
+  version "7.0.6"
+  resolved "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-7.0.6.tgz"
+  integrity sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==
+  dependencies:
+    agent-base "^7.1.2"
+    debug "4"
+
+humanize-ms@^1.2.1:
+  version "1.2.1"
+  dependencies:
+    ms "^2.0.0"
+
+ieee754@^1.1.13:
+  version "1.2.1"
+
+inherits@^2.0.3, inherits@^2.0.4:
+  version "2.0.4"
+
+ini@~1.3.0:
+  version "1.3.8"
+
+instagram-graph-api@^7.0.0:
+  version "7.0.0"
+
+is-arrayish@^0.3.1:
+  version "0.3.2"
+
+is-docker@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/is-docker/-/is-docker-3.0.0.tgz"
+  integrity sha512-eljcgEDlEns/7AXFosB5K/2nCM4P7FQPkGc/DWLy5rmFEWvZayGrik1d9/QIY5nJ4f9YsVvBkA6kJpHn9rISdQ==
+
+is-inside-container@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/is-inside-container/-/is-inside-container-1.0.0.tgz"
+  integrity sha512-KIYLCCJghfHZxqjYBE7rEy0OBuTd5xCHS7tHVgvCLkx7StIoaxwNW3hCALgEUjFfeRk+MG/Qxmp/vtETEF3tRA==
+  dependencies:
+    is-docker "^3.0.0"
+
+is-wsl@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.npmjs.org/is-wsl/-/is-wsl-3.1.0.tgz"
+  integrity sha512-UcVfVfaK4Sc4m7X3dUSoHoozQGBEFeDC+zVo06t98xe8CzHSZZBekNXH+tu0NalHolcJ/QAGqS46Hef7QXBIMw==
+  dependencies:
+    is-inside-container "^1.0.0"
+
+isexe@^2.0.0:
+  version "2.0.0"
+
+iso-3166-1@^2.1.1:
+  version "2.1.1"
+
+js-sha256@^0.9.0:
+  version "0.9.0"
+
+jsonwebtoken@^9.0.0:
+  version "9.0.2"
+  resolved "https://registry.npmjs.org/jsonwebtoken/-/jsonwebtoken-9.0.2.tgz"
+  integrity sha512-PRp66vJ865SSqOlgqS8hujT5U4AOgMfhrwYIuIhfKaoSCZcirrmASQr8CX7cUg+RMih+hgznrjp99o+W4pJLHQ==
+  dependencies:
+    jws "^3.2.2"
+    lodash.includes "^4.3.0"
+    lodash.isboolean "^3.0.3"
+    lodash.isinteger "^4.0.4"
+    lodash.isnumber "^3.0.3"
+    lodash.isplainobject "^4.0.6"
+    lodash.isstring "^4.0.1"
+    lodash.once "^4.0.0"
+    ms "^2.1.1"
+    semver "^7.5.4"
+
+jwa@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.npmjs.org/jwa/-/jwa-1.4.1.tgz"
+  integrity sha512-qiLX/xhEEFKUAJ6FiBMbes3w9ATzyk5W7Hvzpa/SLYdxNtng+gcurvrI7TbACjIXlsJyr05/S1oUhZrc63evQA==
+  dependencies:
+    buffer-equal-constant-time "1.0.1"
+    ecdsa-sig-formatter "1.0.11"
+    safe-buffer "^5.0.1"
+
+jwa@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/jwa/-/jwa-2.0.0.tgz"
+  integrity sha512-jrZ2Qx916EA+fq9cEAeCROWPTfCwi1IVHqT2tapuqLEVVDKFDENFw1oL+MwrTvH6msKxsd1YTDVw6uKEcsrLEA==
+  dependencies:
+    buffer-equal-constant-time "1.0.1"
+    ecdsa-sig-formatter "1.0.11"
+    safe-buffer "^5.0.1"
+
+jws@^3.2.2:
+  version "3.2.2"
+  resolved "https://registry.npmjs.org/jws/-/jws-3.2.2.tgz"
+  integrity sha512-YHlZCB6lMTllWDtSPHz/ZXTsi8S00usEV6v1tjq8tOUZzw7DpSDWVXjXDre6ed1w/pd495ODpHZYSdkRTsa0HA==
+  dependencies:
+    jwa "^1.4.1"
+    safe-buffer "^5.0.1"
+
+jws@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmjs.org/jws/-/jws-4.0.0.tgz"
+  integrity sha512-KDncfTmOZoOMTFG4mBlG0qUIOlc03fmzH+ru6RgYVZhPkyiy/92Owlt/8UEN+a4TXR1FQetfIpJE8ApdvdVxTg==
+  dependencies:
+    jwa "^2.0.0"
+    safe-buffer "^5.0.1"
+
+lodash.includes@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.npmjs.org/lodash.includes/-/lodash.includes-4.3.0.tgz"
+  integrity sha512-W3Bx6mdkRTGtlJISOvVD/lbqjTlPPUDTMnlXZFnVwi9NKJ6tiAk6LVdlhZMm17VZisqhKcgzpO5Wz91PCt5b0w==
+
+lodash.isboolean@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.npmjs.org/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz"
+  integrity sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==
+
+lodash.isinteger@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.npmjs.org/lodash.isinteger/-/lodash.isinteger-4.0.4.tgz"
+  integrity sha512-DBwtEWN2caHQ9/imiNeEA5ys1JoRtRfY3d7V9wkqtbycnAmTvRRmbHKDV4a0EYc678/dia0jrte4tjYwVBaZUA==
+
+lodash.isnumber@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.npmjs.org/lodash.isnumber/-/lodash.isnumber-3.0.3.tgz"
+  integrity sha512-QYqzpfwO3/CWf3XP+Z+tkQsfaLL/EnUlXWVkIk5FUPc4sBdTehEqZONuyRt2P67PXAk+NXmTBcc97zw9t1FQrw==
+
+lodash.isplainobject@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.npmjs.org/lodash.isplainobject/-/lodash.isplainobject-4.0.6.tgz"
+  integrity sha512-oSXzaWypCMHkPC3NvBEaPHf0KsA5mvPrOPgQWDsbg8n7orZ290M0BmC/jgRZ4vcJ6DTAhjrsSYgdsW/F+MFOBA==
+
+lodash.isstring@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npmjs.org/lodash.isstring/-/lodash.isstring-4.0.1.tgz"
+  integrity sha512-0wJxfxH1wgO3GrbuP+dTTk7op+6L41QCXbGINEmD+ny/G/eCqGzxyCsh7159S+mgDDcoarnBw6PC1PS5+wUGgw==
+
+lodash.once@^4.0.0:
+  version "4.1.1"
+  resolved "https://registry.npmjs.org/lodash.once/-/lodash.once-4.1.1.tgz"
+  integrity sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==
+
+lru-cache@^4.0.1:
+  version "4.1.5"
+  dependencies:
+    pseudomap "^1.0.2"
+    yallist "^2.1.2"
+
+mime-db@1.52.0:
+  version "1.52.0"
+
+mime-types@^2.1.12:
+  version "2.1.35"
+  dependencies:
+    mime-db "1.52.0"
+
+mimic-response@^3.1.0:
+  version "3.1.0"
+
+minimist@^1.2.0, minimist@^1.2.3:
+  version "1.2.8"
+
+mixwith@~0.1.1:
+  version "0.1.1"
+
+mkdirp-classic@^0.5.2, mkdirp-classic@^0.5.3:
+  version "0.5.3"
+
+ms@^2.0.0, ms@^2.1.1, ms@^2.1.3:
+  version "2.1.3"
+
+napi-build-utils@^2.0.0:
+  version "2.0.0"
+
+node-abi@^3.3.0:
+  version "3.74.0"
+  dependencies:
+    semver "^7.3.5"
+
+node-addon-api@^7.0.0:
+  version "7.1.1"
+
+node-appwrite@^14.1.0:
+  version "14.1.0"
+  dependencies:
+    node-fetch-native-with-agent "1.7.2"
+
+node-domexception@^1.0.0, node-domexception@1.0.0:
+  version "1.0.0"
+
+node-fetch-native-with-agent@1.7.2:
+  version "1.7.2"
+
+node-fetch@^2.6.7:
+  version "2.7.0"
+  dependencies:
+    whatwg-url "^5.0.0"
+
+node-fetch@^3.3.2:
+  version "3.3.2"
+  dependencies:
+    data-uri-to-buffer "^4.0.0"
+    fetch-blob "^3.1.4"
+    formdata-polyfill "^4.0.10"
+
+nub@~0.0.0:
+  version "0.0.0"
+
+once@^1.3.1, once@^1.4.0:
+  version "1.4.0"
+  dependencies:
+    wrappy "1"
+
+open@^10.1.0:
+  version "10.1.0"
+  resolved "https://registry.npmjs.org/open/-/open-10.1.0.tgz"
+  integrity sha512-mnkeQ1qP5Ue2wd+aivTD3NHd/lZ96Lu0jgf0pwktLPtx6cTZiH7tyeGRRHs0zX0rbrahXPnXlUnbeXyaBBuIaw==
+  dependencies:
+    default-browser "^5.2.1"
+    define-lazy-prop "^3.0.0"
+    is-inside-container "^1.0.0"
+    is-wsl "^3.1.0"
+
+openai@^4.83.0:
+  version "4.83.0"
+  dependencies:
+    "@types/node" "^18.11.18"
+    "@types/node-fetch" "^2.6.4"
+    abort-controller "^3.0.0"
+    agentkeepalive "^4.2.1"
+    form-data-encoder "1.7.2"
+    formdata-node "^4.3.2"
+    node-fetch "^2.6.7"
+
+pako@^1.0.10, pako@^1.0.11, pako@^1.0.6:
+  version "1.0.11"
+
+pdf.js-extract@^0.2.1:
+  version "0.2.1"
+  dependencies:
+    dommatrix "0.0.24"
+    web-streams-polyfill "3.2.0"
+
+pdfjs-dist@^4.10.38:
+  version "4.10.38"
+  optionalDependencies:
+    "@napi-rs/canvas" "^0.1.65"
+
+prebuild-install@^7.1.1:
+  version "7.1.3"
+  dependencies:
+    detect-libc "^2.0.0"
+    expand-template "^2.0.3"
+    github-from-package "0.0.0"
+    minimist "^1.2.3"
+    mkdirp-classic "^0.5.3"
+    napi-build-utils "^2.0.0"
+    node-abi "^3.3.0"
+    pump "^3.0.0"
+    rc "^1.2.7"
+    simple-get "^4.0.0"
+    tar-fs "^2.0.0"
+    tunnel-agent "^0.6.0"
+
+proxy-from-env@^1.1.0:
+  version "1.1.0"
+
+pseudomap@^1.0.2:
+  version "1.0.2"
+
+pump@^3.0.0:
+  version "3.0.2"
+  dependencies:
+    end-of-stream "^1.1.0"
+    once "^1.3.1"
+
+rc@^1.2.7:
+  version "1.2.8"
+  dependencies:
+    deep-extend "^0.6.0"
+    ini "~1.3.0"
+    minimist "^1.2.0"
+    strip-json-comments "~2.0.1"
+
+readable-stream@^3.1.1, readable-stream@^3.4.0:
+  version "3.6.2"
+  dependencies:
+    inherits "^2.0.3"
+    string_decoder "^1.1.1"
+    util-deprecate "^1.0.1"
+
+regenerator-runtime@^0.14.0:
+  version "0.14.1"
+
+run-applescript@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.npmjs.org/run-applescript/-/run-applescript-7.0.0.tgz"
+  integrity sha512-9by4Ij99JUr/MCFBUkDKLWK3G9HVXmabKz9U5MlIAIuvuzkiOicRYs8XJLxX+xahD+mLiiCYDqF9dKAgtzKP1A==
+
+safe-buffer@^5.0.1, safe-buffer@~5.2.0:
+  version "5.2.1"
+
+sax@>=0.6.0:
+  version "1.4.1"
+
+semver@^7.3.5, semver@^7.5.4, semver@^7.6.3:
+  version "7.7.1"
+
+simple-concat@^1.0.0:
+  version "1.0.1"
+
+simple-get@^4.0.0:
+  version "4.0.1"
+  dependencies:
+    decompress-response "^6.0.0"
+    once "^1.3.1"
+    simple-concat "^1.0.0"
+
+simple-swizzle@^0.2.2:
+  version "0.2.2"
+  dependencies:
+    is-arrayish "^0.3.1"
+
+stoppable@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.npmjs.org/stoppable/-/stoppable-1.1.0.tgz"
+  integrity sha512-KXDYZ9dszj6bzvnEMRYvxgeTHU74QBFL54XKtP3nyMuJ81CFYtABZ3bAzL2EdFUaEwJOBOgENyFj3R7oTzDyyw==
+
+string_decoder@^1.1.1:
+  version "1.3.0"
+  dependencies:
+    safe-buffer "~5.2.0"
+
+strip-json-comments@~2.0.1:
+  version "2.0.1"
+
+tar-fs@^2.0.0:
+  version "2.1.2"
+  dependencies:
+    chownr "^1.1.1"
+    mkdirp-classic "^0.5.2"
+    pump "^3.0.0"
+    tar-stream "^2.1.4"
+
+tar-stream@^2.1.4:
+  version "2.2.0"
+  dependencies:
+    bl "^4.0.3"
+    end-of-stream "^1.4.1"
+    fs-constants "^1.0.0"
+    inherits "^2.0.3"
+    readable-stream "^3.1.1"
+
+tr46@~0.0.3:
+  version "0.0.3"
+
+tslib@^1.11.1, tslib@^2.2.0, tslib@^2.6.2:
+  version "2.8.1"
+
+tunnel-agent@^0.6.0:
+  version "0.6.0"
+  dependencies:
+    safe-buffer "^5.0.1"
+
+undici-types@~5.26.4:
+  version "5.26.5"
+
+undici-types@~6.13.0:
+  version "6.13.0"
+
+undici-types@~6.19.2:
+  version "6.19.8"
+  resolved "https://registry.npmjs.org/undici-types/-/undici-types-6.19.8.tgz"
+  integrity sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==
+
+util-deprecate@^1.0.1:
+  version "1.0.2"
+
+uuid@^8.3.0:
+  version "8.3.2"
+  resolved "https://registry.npmjs.org/uuid/-/uuid-8.3.2.tgz"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
+
+web-streams-polyfill@^3.0.3:
+  version "3.3.3"
+
+web-streams-polyfill@3.2.0:
+  version "3.2.0"
+
+web-streams-polyfill@4.0.0-beta.3:
+  version "4.0.0-beta.3"
+
+webidl-conversions@^3.0.0:
+  version "3.0.1"
+
+whatwg-url@^5.0.0:
+  version "5.0.0"
+  dependencies:
+    tr46 "~0.0.3"
+    webidl-conversions "^3.0.0"
+
+which@^1.2.9:
+  version "1.3.1"
+  dependencies:
+    isexe "^2.0.0"
+
+wrappy@1:
+  version "1.0.2"
+
+xml2js@^0.6.2:
+  version "0.6.2"
+  dependencies:
+    sax ">=0.6.0"
+    xmlbuilder "~11.0.0"
+
+xmlbuilder@~11.0.0:
+  version "11.0.1"
+
+yallist@^2.1.2:
+  version "2.1.2"
+
+zod@^3.23.8, zod@1:
   version "1.11.17"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-1.11.17.tgz#2aae9e91fc66128116ae9844e8f416a95f453f8e"
+  resolved "https://registry.npmjs.org/zod/-/zod-1.11.17.tgz"
   integrity sha512-UzIwO92D0dSFwIRyyqAfRXICITLjF0IP8tRbEK/un7adirMssWZx8xF/1hZNE7t61knWZ+lhEuUvxlu2MO8qqA==
 
 zod@3:
-  version "3.20.2"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.20.2.tgz#068606642c8f51b3333981f91c0a8ab37dfc2807"
-  integrity sha512-1MzNQdAvO+54H+EaK5YpyEy0T+Ejo/7YLHS93G3RnYWh5gaotGHwGeN/ZO687qEDU2y4CdStQYXVHIgrUl5UVQ==
+  version "3.23.8"
