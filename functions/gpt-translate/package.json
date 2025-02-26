@@ -1,0 +1,15 @@
+{
+  "name": "@biso/gpt-translate",
+  "version": "0.0.1",
+  "module": "index.ts",
+  "type": "module",
+  "dependencies": {
+    "@biso/appwrite": "0.0.1",
+    "@biso/twentyfour": "0.0.1",
+    "@biso/types": "0.0.1",
+    "bun-types": "latest",
+    "canvas": "^3.1.0",
+    "pdfjs-dist": "^4.10.38",
+    "zod": "1"
+  }
+}
