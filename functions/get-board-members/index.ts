@@ -8,6 +8,13 @@ type Context = {
   error: (msg: any) => void;
 };
 
+interface DepartmentMember {
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+}
+
 export default async ({ req, res, log, error }: Context) => {
   try {
     // Get campus and departmentId from request body
@@ -26,11 +33,11 @@ export default async ({ req, res, log, error }: Context) => {
     // Initialize Appwrite admin client
     const { databases } = await createAdminClient();
     
-    // Find the department in the database
+    // Find the department in the database to get its name
     let department;
     try {
       department = await databases.getDocument('app', 'departments', departmentId);
-      log(`Found department: ${department.Name}`);
+      log(`Found department: ${department.name}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       error(`Department not found: ${errorMessage}`);
@@ -48,30 +55,34 @@ export default async ({ req, res, log, error }: Context) => {
     );
     
     // Handle potential department name mismatches between Appwrite and M365
-    const departmentName = department.Name;
+    const departmentName = department.name;
     
     log(`Attempting to find users for department: ${departmentName}`);
     
     // Try multiple search strategies to handle name variations
-    let allUsers: any[] = [];
+    let members: DepartmentMember[] = [];
     
     // Strategy 1: Try exact match first
     try {
       const exactMatchResponse = await graphClient
         .api('/users')
         .filter(`department eq '${departmentName}'`)
-        .select('id,displayName,userPrincipalName,mail,department,jobTitle,businessPhones,mobilePhone')
+        .select('displayName,mail,businessPhones,mobilePhone,jobTitle')
         .get();
       
-      allUsers = exactMatchResponse.value;
-      log(`Found ${allUsers.length} users with exact department name match`);
+      if (exactMatchResponse.value.length > 0) {
+        members = mapGraphUsersToMembers(exactMatchResponse.value);
+        log(`Found ${members.length} users with exact department name match`);
+      } else {
+        log(`No users found with exact department name: ${departmentName}`);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      log(`No exact matches found or error occurred: ${errorMessage}`);
+      log(`Error with exact match query: ${errorMessage}`);
     }
     
     // Strategy 2: If no results from exact match, try extracting the last word (e.g., "Karrieredagene" from "OSL Karrieredagene")
-    if (allUsers.length === 0 && departmentName.includes(' ')) {
+    if (members.length === 0 && departmentName.includes(' ')) {
       const baseDepartmentName = departmentName.split(' ').pop() || '';
       
       if (baseDepartmentName) {
@@ -81,22 +92,25 @@ export default async ({ req, res, log, error }: Context) => {
           const baseNameResponse = await graphClient
             .api('/users')
             .filter(`department eq '${baseDepartmentName}'`)
-            .select('id,displayName,userPrincipalName,mail,department,jobTitle,businessPhones,mobilePhone')
+            .select('displayName,mail,businessPhones,mobilePhone,jobTitle')
             .get();
           
-          allUsers = baseNameResponse.value;
-          log(`Found ${allUsers.length} users with base department name match`);
+          if (baseNameResponse.value.length > 0) {
+            members = mapGraphUsersToMembers(baseNameResponse.value);
+            log(`Found ${members.length} users with base department name match`);
+          } else {
+            log(`No users found with base department name: ${baseDepartmentName}`);
+          }
         } catch (err) {
           const errorMessage = err instanceof Error ? err.message : String(err);
-          log(`No base name matches found or error occurred: ${errorMessage}`);
+          log(`Error with base name query: ${errorMessage}`);
         }
       }
     }
     
     // Strategy 3: If still no results, try a contains search as a last resort
-    if (allUsers.length === 0) {
+    if (members.length === 0) {
       // Get a significant word from the department name to search for
-      // This could be improved with more sophisticated text matching if needed
       const searchTerm = departmentName.split(' ')
         .filter((word: string) => word.length > 3)  // Only use words with more than 3 characters
         .pop() || departmentName;
@@ -107,23 +121,27 @@ export default async ({ req, res, log, error }: Context) => {
         const partialMatchResponse = await graphClient
           .api('/users')
           .filter(`contains(department, '${searchTerm}')`)
-          .select('id,displayName,userPrincipalName,mail,department,jobTitle,businessPhones,mobilePhone')
+          .select('displayName,mail,businessPhones,mobilePhone,jobTitle')
           .get();
         
-        allUsers = partialMatchResponse.value;
-        log(`Found ${allUsers.length} users with partial department name match`);
+        if (partialMatchResponse.value.length > 0) {
+          members = mapGraphUsersToMembers(partialMatchResponse.value);
+          log(`Found ${members.length} users with partial department name match`);
+        } else {
+          log(`No users found with partial department name: ${searchTerm}`);
+        }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
-        log(`No partial matches found or error occurred: ${errorMessage}`);
+        log(`Error with partial match query: ${errorMessage}`);
       }
     }
     
-    // Return success response with department and users
+    // Return only the department members from M365
     return res.json({
       success: true,
-      department,
-      users: allUsers,
-      count: allUsers.length
+      members: members,
+      count: members.length,
+      departmentName: departmentName
     });
     
   } catch (err) {
@@ -138,3 +156,30 @@ export default async ({ req, res, log, error }: Context) => {
     }, 500);
   }
 };
+
+/**
+ * Maps users from Graph API response to the DepartmentMember interface
+ */
+function mapGraphUsersToMembers(graphUsers: any[]): DepartmentMember[] {
+  return graphUsers.map(user => ({
+    name: user.displayName || '',
+    email: user.mail || '',
+    phone: getPhoneNumber(user),
+    role: user.jobTitle || ''
+  }));
+}
+
+/**
+ * Helper function to get the best available phone number
+ */
+function getPhoneNumber(user: any): string {
+  if (Array.isArray(user.businessPhones) && user.businessPhones.length > 0) {
+    return user.businessPhones[0];
+  }
+  
+  if (user.mobilePhone) {
+    return user.mobilePhone;
+  }
+  
+  return '';
+}
