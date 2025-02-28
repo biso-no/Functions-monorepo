@@ -14,6 +14,7 @@ interface DepartmentMember {
   phone: string;
   role: string;
   officeLocation: string;
+  profilePhotoUrl?: string;
 }
 
 interface CampusMapping {
@@ -111,7 +112,7 @@ export default async ({ req, res, log, error }: Context) => {
         .get();
       
       if (exactMatchResponse.value && exactMatchResponse.value.length > 0) {
-        members = mapGraphUsersToMembers(exactMatchResponse.value, campusInfo.name);
+        members = await mapGraphUsersToMembers(exactMatchResponse.value, campusInfo.name, graphClient);
         log(`Found ${members.length} users with exact department and office match`);
       } else {
         log(`No users found with exact department and office match`);
@@ -134,13 +135,13 @@ export default async ({ req, res, log, error }: Context) => {
         
         if (fallbackResponse.value && fallbackResponse.value.length > 0) {
           // Filter the results client-side to match the office
-          const filteredUsers = fallbackResponse.value.filter(user => 
+          const filteredUsers = fallbackResponse.value.filter((user: any) => 
             user.officeLocation && 
             (user.officeLocation === campusInfo.officeFilter || 
              user.officeLocation.includes(campusInfo.officeFilter))
           );
           
-          members = mapGraphUsersToMembers(filteredUsers, campusInfo.name);
+          members = await mapGraphUsersToMembers(filteredUsers, campusInfo.name, graphClient);
           log(`Found ${members.length} users after client-side filtering for office`);
         }
       } catch (fallbackErr) {
@@ -168,7 +169,7 @@ export default async ({ req, res, log, error }: Context) => {
             .get();
           
           if (baseNameResponse.value && baseNameResponse.value.length > 0) {
-            members = mapGraphUsersToMembers(baseNameResponse.value, campusInfo.name);
+            members = await mapGraphUsersToMembers(baseNameResponse.value, campusInfo.name, graphClient);
             log(`Found ${members.length} users with base department name and office match`);
           } else {
             log(`No users found with base department name and office match`);
@@ -201,7 +202,7 @@ export default async ({ req, res, log, error }: Context) => {
           .get();
         
         if (partialMatchResponse.value && partialMatchResponse.value.length > 0) {
-          members = mapGraphUsersToMembers(partialMatchResponse.value, campusInfo.name);
+          members = await mapGraphUsersToMembers(partialMatchResponse.value, campusInfo.name, graphClient);
           log(`Found ${members.length} users with partial department name and office match`);
         } else {
           log(`No users found with partial department name and office match`);
@@ -227,7 +228,7 @@ export default async ({ req, res, log, error }: Context) => {
         
         if (officeOnlyResponse.value && officeOnlyResponse.value.length > 0) {
           // Sort users with departments similar to what we're looking for to the top
-          const sortedUsers = officeOnlyResponse.value.sort((a, b) => {
+          const sortedUsers = officeOnlyResponse.value.sort((a: any, b: any) => {
             const aDept = (a.department || '').toLowerCase();
             const bDept = (b.department || '').toLowerCase();
             const targetDept = departmentName.toLowerCase();
@@ -240,7 +241,7 @@ export default async ({ req, res, log, error }: Context) => {
             return aDept.localeCompare(bDept);
           });
           
-          members = mapGraphUsersToMembers(sortedUsers, campusInfo.name);
+          members = await mapGraphUsersToMembers(sortedUsers, campusInfo.name, graphClient);
           log(`Found ${members.length} users in the office location`);
         } else {
           log(`No users found in office location: ${campusInfo.officeFilter}`);
@@ -275,19 +276,45 @@ export default async ({ req, res, log, error }: Context) => {
 
 /**
  * Maps users from Graph API response to the DepartmentMember interface
+ * and fetches profile photos for each user
  */
-function mapGraphUsersToMembers(graphUsers: any[], defaultOffice: string): DepartmentMember[] {
+async function mapGraphUsersToMembers(graphUsers: any[], defaultOffice: string, graphClient: any): Promise<DepartmentMember[]> {
   if (!Array.isArray(graphUsers)) {
     return [];
   }
   
-  return graphUsers.map(user => ({
+  // First map the basic user data
+  const members: DepartmentMember[] = graphUsers.map(user => ({
     name: user.displayName || '',
     email: user.mail || '',
     phone: getPhoneNumber(user),
     role: user.jobTitle || '',
     officeLocation: user.officeLocation || defaultOffice
   }));
+  
+  // Then fetch profile photos for users with email addresses
+  for (let i = 0; i < members.length; i++) {
+    if (members[i].email) {
+      try {
+        // Get the photo as a data URL
+        const photoResponse = await graphClient
+          .api(`/users/${members[i].email}/photo/$value`)
+          .header('Content-Type', 'image/jpeg')
+          .get();
+        
+        if (photoResponse) {
+          // Convert the binary data to a Base64 string
+          const base64Photo = Buffer.from(photoResponse).toString('base64');
+          members[i].profilePhotoUrl = `data:image/jpeg;base64,${base64Photo}`;
+        }
+      } catch (err) {
+        // Skip if photo not available
+        console.log(`No photo available for user: ${members[i].email}`);
+      }
+    }
+  }
+  
+  return members;
 }
 
 /**
