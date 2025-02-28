@@ -30,7 +30,7 @@ export default async ({ req, res, log, error }: Context) => {
     let department;
     try {
       department = await databases.getDocument('app', 'departments', departmentId);
-      log(`Found department: ${department.name}`);
+      log(`Found department: ${department.Name}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       error(`Department not found: ${errorMessage}`);
@@ -48,7 +48,7 @@ export default async ({ req, res, log, error }: Context) => {
     );
     
     // Handle potential department name mismatches between Appwrite and M365
-    const departmentName = department.name;
+    const departmentName = department.Name;
     
     log(`Attempting to find users for department: ${departmentName}`);
     
