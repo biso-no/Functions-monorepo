@@ -13,38 +13,73 @@ interface DepartmentMember {
   email: string;
   phone: string;
   role: string;
+  officeLocation: string;
+}
+
+interface CampusMapping {
+  id: string;
+  name: string;
+  defaultDepartment: string;
 }
 
 export default async ({ req, res, log, error }: Context) => {
   try {
-    // Get campus and departmentId from request body
+    // Get campus and optional departmentId from request body
     const { campus, departmentId } = req.body;
     
-    // Validate request parameters
-    if (!campus || !departmentId) {
+    // Validate campus parameter
+    if (!campus) {
       return res.json({
         success: false,
-        message: 'Missing required parameters: campus and departmentId are required'
+        message: 'Missing required parameter: campus is required'
       }, 400);
     }
 
-    log(`Processing request for department ${departmentId} in campus ${campus}`);
+    log(`Processing request for campus ${campus}${departmentId ? ` and department ${departmentId}` : ''}`);
     
     // Initialize Appwrite admin client
     const { databases } = await createAdminClient();
     
-    // Find the department in the database to get its name
-    let department;
-    try {
-      department = await databases.getDocument('app', 'departments', departmentId);
-      log(`Found department: ${department.Name}`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      error(`Department not found: ${errorMessage}`);
-      return res.json({
-        success: false,
-        message: `Department with ID ${departmentId} not found`
-      }, 404);
+    // Define campus mappings
+    const campusMappings: CampusMapping[] = [
+      { id: "1", name: "Oslo", defaultDepartment: "Campus Management" },
+      { id: "2", name: "Bergen", defaultDepartment: "Campus Management" },
+      { id: "3", name: "Trondheim", defaultDepartment: "Campus Management" },
+      { id: "4", name: "Stavanger", defaultDepartment: "Campus Management" },
+      { id: "5", name: "National", defaultDepartment: "Operations Unit" }
+    ];
+    
+    // Get campus information
+    const campusInfo = campusMappings.find(c => c.id === campus) || 
+                      { id: campus, name: "Unknown", defaultDepartment: "Campus Management" };
+
+    // If no departmentId provided, use the default department for this campus
+    let departmentName = "";
+    
+    if (departmentId) {
+      // Department ID provided - look it up in the database
+      try {
+        const department = await databases.getDocument('app', 'departments', departmentId);
+        departmentName = department.name || "";
+        
+        if (!departmentName) {
+          log(`Warning: Department found but has no name. Using ID as fallback.`);
+          departmentName = departmentId;
+        } else {
+          log(`Found department: ${departmentName}`);
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        error(`Department not found: ${errorMessage}`);
+        return res.json({
+          success: false,
+          message: `Department with ID ${departmentId} not found`
+        }, 404);
+      }
+    } else {
+      // No department ID provided - use campus default
+      departmentName = campusInfo.defaultDepartment;
+      log(`No department ID provided. Using campus default: ${departmentName}`);
     }
 
     // Initialize the Graph client with environment variables
@@ -53,9 +88,6 @@ export default async ({ req, res, log, error }: Context) => {
       process.env.AZURE_CLIENT_ID!,
       process.env.AZURE_CLIENT_SECRET!
     );
-    
-    // Handle potential department name mismatches between Appwrite and M365
-    const departmentName = department.Name;
     
     log(`Attempting to find users for department: ${departmentName}`);
     
@@ -67,11 +99,11 @@ export default async ({ req, res, log, error }: Context) => {
       const exactMatchResponse = await graphClient
         .api('/users')
         .filter(`department eq '${departmentName}'`)
-        .select('displayName,mail,businessPhones,mobilePhone,jobTitle')
+        .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation')
         .get();
       
-      if (exactMatchResponse.value.length > 0) {
-        members = mapGraphUsersToMembers(exactMatchResponse.value);
+      if (exactMatchResponse.value && exactMatchResponse.value.length > 0) {
+        members = mapGraphUsersToMembers(exactMatchResponse.value, campusInfo.name);
         log(`Found ${members.length} users with exact department name match`);
       } else {
         log(`No users found with exact department name: ${departmentName}`);
@@ -82,8 +114,9 @@ export default async ({ req, res, log, error }: Context) => {
     }
     
     // Strategy 2: If no results from exact match, try extracting the last word (e.g., "Karrieredagene" from "OSL Karrieredagene")
-    if (members.length === 0 && departmentName.includes(' ')) {
-      const baseDepartmentName = departmentName.split(' ').pop() || '';
+    if (members.length === 0 && departmentName && departmentName.includes(' ')) {
+      const parts = departmentName.split(' ');
+      const baseDepartmentName = parts.length > 0 ? parts[parts.length - 1] : '';
       
       if (baseDepartmentName) {
         log(`Trying with base department name: ${baseDepartmentName}`);
@@ -92,11 +125,11 @@ export default async ({ req, res, log, error }: Context) => {
           const baseNameResponse = await graphClient
             .api('/users')
             .filter(`department eq '${baseDepartmentName}'`)
-            .select('displayName,mail,businessPhones,mobilePhone,jobTitle')
+            .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation')
             .get();
           
-          if (baseNameResponse.value.length > 0) {
-            members = mapGraphUsersToMembers(baseNameResponse.value);
+          if (baseNameResponse.value && baseNameResponse.value.length > 0) {
+            members = mapGraphUsersToMembers(baseNameResponse.value, campusInfo.name);
             log(`Found ${members.length} users with base department name match`);
           } else {
             log(`No users found with base department name: ${baseDepartmentName}`);
@@ -109,11 +142,11 @@ export default async ({ req, res, log, error }: Context) => {
     }
     
     // Strategy 3: If still no results, try a contains search as a last resort
-    if (members.length === 0) {
+    if (members.length === 0 && departmentName) {
       // Get a significant word from the department name to search for
-      const searchTerm = departmentName.split(' ')
-        .filter((word: string) => word.length > 3)  // Only use words with more than 3 characters
-        .pop() || departmentName;
+      const words = departmentName.split(' ');
+      const significantWords = words.filter(word => word.length > 3);
+      const searchTerm = significantWords.length > 0 ? significantWords[significantWords.length - 1] : departmentName;
       
       log(`Trying with partial match search term: ${searchTerm}`);
       
@@ -121,11 +154,11 @@ export default async ({ req, res, log, error }: Context) => {
         const partialMatchResponse = await graphClient
           .api('/users')
           .filter(`contains(department, '${searchTerm}')`)
-          .select('displayName,mail,businessPhones,mobilePhone,jobTitle')
+          .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation')
           .get();
         
-        if (partialMatchResponse.value.length > 0) {
-          members = mapGraphUsersToMembers(partialMatchResponse.value);
+        if (partialMatchResponse.value && partialMatchResponse.value.length > 0) {
+          members = mapGraphUsersToMembers(partialMatchResponse.value, campusInfo.name);
           log(`Found ${members.length} users with partial department name match`);
         } else {
           log(`No users found with partial department name: ${searchTerm}`);
@@ -141,7 +174,8 @@ export default async ({ req, res, log, error }: Context) => {
       success: true,
       members: members,
       count: members.length,
-      departmentName: departmentName
+      departmentName: departmentName,
+      campus: campusInfo.name
     });
     
   } catch (err) {
@@ -160,12 +194,17 @@ export default async ({ req, res, log, error }: Context) => {
 /**
  * Maps users from Graph API response to the DepartmentMember interface
  */
-function mapGraphUsersToMembers(graphUsers: any[]): DepartmentMember[] {
+function mapGraphUsersToMembers(graphUsers: any[], defaultOffice: string): DepartmentMember[] {
+  if (!Array.isArray(graphUsers)) {
+    return [];
+  }
+  
   return graphUsers.map(user => ({
     name: user.displayName || '',
     email: user.mail || '',
     phone: getPhoneNumber(user),
-    role: user.jobTitle || ''
+    role: user.jobTitle || '',
+    officeLocation: user.officeLocation || defaultOffice
   }));
 }
 
@@ -173,6 +212,10 @@ function mapGraphUsersToMembers(graphUsers: any[]): DepartmentMember[] {
  * Helper function to get the best available phone number
  */
 function getPhoneNumber(user: any): string {
+  if (!user) {
+    return '';
+  }
+  
   if (Array.isArray(user.businessPhones) && user.businessPhones.length > 0) {
     return user.businessPhones[0];
   }
