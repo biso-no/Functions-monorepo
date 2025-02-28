@@ -27,7 +27,14 @@ interface CampusMapping {
 export default async ({ req, res, log, error }: Context) => {
   try {
     // Get campus and optional departmentId from request body
-    const { campus, departmentId } = JSON.parse(req.body);
+    let requestBody;
+    try {
+      requestBody = JSON.parse(req.body);
+    } catch (e) {
+      requestBody = req.body; // If already parsed
+    }
+    
+    const { campus, departmentId } = requestBody;
     
     // Validate campus parameter
     if (!campus) {
@@ -91,175 +98,128 @@ export default async ({ req, res, log, error }: Context) => {
       process.env.AZURE_CLIENT_SECRET!
     );
     
-    log(`Attempting to find users for department: ${departmentName} in office: ${campusInfo.officeFilter}`);
+    log(`Attempting to find users for department: ${departmentName} in office: ${campusInfo.name}`);
     
     // Try multiple search strategies to handle name variations
     let members: DepartmentMember[] = [];
     
-    // Strategy 1: Try exact match first with office filter
+    // Strategy 1: Get all users and filter client-side - most compatible approach
     try {
-      // Filter by both department and office location
-      const departmentFilter = `department eq '${departmentName}'`;
-      const officeFilter = `officeLocation eq '${campusInfo.officeFilter}' or contains(officeLocation, '${campusInfo.officeFilter}')`;
-      const combinedFilter = `(${departmentFilter}) and (${officeFilter})`;
+      log(`Getting all users and filtering client-side for department: "${departmentName}" and office: "${campusInfo.name}"`);
       
-      log(`Using filter: ${combinedFilter}`);
-      
-      const exactMatchResponse = await graphClient
+      // Get all users with their key properties
+      const allUsersResponse = await graphClient
         .api('/users')
-        .filter(combinedFilter)
-        .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation')
+        .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation,department')
+        .top(999) // Get as many users as possible (max 999)
         .get();
       
-      if (exactMatchResponse.value && exactMatchResponse.value.length > 0) {
-        members = await mapGraphUsersToMembers(exactMatchResponse.value, campusInfo.name, graphClient);
-        log(`Found ${members.length} users with exact department and office match`);
+      if (allUsersResponse.value && allUsersResponse.value.length > 0) {
+        log(`Retrieved ${allUsersResponse.value.length} total users, filtering now...`);
+        
+        // Filter client-side
+        const filteredUsers = allUsersResponse.value.filter((user: any) => {
+          // Check if user has the required department
+          const hasDepartment = 
+            user.department && 
+            (user.department === departmentName || 
+             user.department.toLowerCase().includes(departmentName.toLowerCase()) || 
+             departmentName.toLowerCase().includes(user.department.toLowerCase()));
+          
+          // Check if user has the required office location
+          const hasOffice = 
+            user.officeLocation && 
+            (user.officeLocation === campusInfo.name || 
+             user.officeLocation.toLowerCase().includes(campusInfo.name.toLowerCase()) || 
+             campusInfo.name.toLowerCase().includes(user.officeLocation.toLowerCase()));
+          
+          return hasDepartment && hasOffice;
+        });
+        
+        if (filteredUsers.length > 0) {
+          members = await mapGraphUsersToMembers(filteredUsers, campusInfo.name, graphClient);
+          log(`Found ${members.length} matching users after client-side filtering`);
+        } else {
+          log(`No matching users found after client-side filtering`);
+          
+          // Try a more lenient approach with just the department
+          log(`Trying more lenient approach: just checking department"`);
+          
+          const departmentUsers = allUsersResponse.value.filter((user: any) => {
+            const hasDepartment = 
+              user.department && 
+              (user.department === departmentName || 
+               user.department.toLowerCase().includes(departmentName.toLowerCase()) || 
+               departmentName.toLowerCase().includes(user.department.toLowerCase()));
+            
+            return hasDepartment;
+          });
+          
+          if (departmentUsers.length > 0) {
+            members = await mapGraphUsersToMembers(departmentUsers, campusInfo.name, graphClient);
+            log(`Found ${members.length} users with matching department`);
+          } else {
+            log(`No users found with matching department`);
+          }
+        }
       } else {
-        log(`No users found with exact department and office match`);
+        log(`No users retrieved from Graph API`);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      log(`Error with exact match query: ${errorMessage}`);
-      
-      // Fallback: Try just department filter if the combined filter fails
+      error(`Error querying users: ${errorMessage}`);
+    }
+    
+    // If still no results, try with just the basic department and office queries
+    if (members.length === 0) {
       try {
-        const departmentFilter = `department eq '${departmentName}'`;
+        log(`Trying with simple eq filter for exact department: "${departmentName}"`);
         
-        log(`Falling back to department-only filter: ${departmentFilter}`);
-        
-        const fallbackResponse = await graphClient
+        const exactMatchResponse = await graphClient
           .api('/users')
-          .filter(departmentFilter)
+          .filter(`department eq '${departmentName}'`)
           .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation')
           .get();
         
-        if (fallbackResponse.value && fallbackResponse.value.length > 0) {
-          // Filter the results client-side to match the office
-          const filteredUsers = fallbackResponse.value.filter((user: any) => 
-            user.officeLocation && 
-            (user.officeLocation === campusInfo.officeFilter || 
-             user.officeLocation.includes(campusInfo.officeFilter))
+        if (exactMatchResponse.value && exactMatchResponse.value.length > 0) {
+          // Filter client-side for office
+          const officeUsers = exactMatchResponse.value.filter((user: any) => 
+            user.officeLocation && user.officeLocation.toLowerCase().includes(campusInfo.name.toLowerCase())
           );
           
-          members = await mapGraphUsersToMembers(filteredUsers, campusInfo.name, graphClient);
-          log(`Found ${members.length} users after client-side filtering for office`);
-        }
-      } catch (fallbackErr) {
-        log(`Fallback query also failed: ${fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)}`);
-      }
-    }
-    
-    // Strategy 2: If no results, try with base department name
-    if (members.length === 0 && departmentName && departmentName.includes(' ')) {
-      const parts = departmentName.split(' ');
-      const baseDepartmentName = parts.length > 0 ? parts[parts.length - 1] : '';
-      
-      if (baseDepartmentName) {
-        log(`Trying with base department name: ${baseDepartmentName} and office: ${campusInfo.officeFilter}`);
-        
-        try {
-          const departmentFilter = `department eq '${baseDepartmentName}'`;
-          const officeFilter = `officeLocation eq '${campusInfo.officeFilter}' or contains(officeLocation, '${campusInfo.officeFilter}')`;
-          const combinedFilter = `(${departmentFilter}) and (${officeFilter})`;
-          
-          const baseNameResponse = await graphClient
-            .api('/users')
-            .filter(combinedFilter)
-            .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation')
-            .get();
-          
-          if (baseNameResponse.value && baseNameResponse.value.length > 0) {
-            members = await mapGraphUsersToMembers(baseNameResponse.value, campusInfo.name, graphClient);
-            log(`Found ${members.length} users with base department name and office match`);
-          } else {
-            log(`No users found with base department name and office match`);
-          }
-        } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : String(err);
-          log(`Error with base name query: ${errorMessage}`);
-        }
-      }
-    }
-    
-    // Strategy 3: If still no results, try a contains search for department
-    if (members.length === 0 && departmentName) {
-      // Get a significant word from the department name to search for
-      const words = departmentName.split(' ');
-      const significantWords = words.filter(word => word.length > 3);
-      const searchTerm = significantWords.length > 0 ? significantWords[significantWords.length - 1] : departmentName;
-      
-      log(`Trying with partial match search term: ${searchTerm} and office: ${campusInfo.officeFilter}`);
-      
-      try {
-        const departmentFilter = `contains(department, '${searchTerm}')`;
-        const officeFilter = `officeLocation eq '${campusInfo.officeFilter}' or contains(officeLocation, '${campusInfo.officeFilter}')`;
-        const combinedFilter = `(${departmentFilter}) and (${officeFilter})`;
-        
-        const partialMatchResponse = await graphClient
-          .api('/users')
-          .filter(combinedFilter)
-          .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation')
-          .get();
-        
-        if (partialMatchResponse.value && partialMatchResponse.value.length > 0) {
-          members = await mapGraphUsersToMembers(partialMatchResponse.value, campusInfo.name, graphClient);
-          log(`Found ${members.length} users with partial department name and office match`);
+          members = await mapGraphUsersToMembers(officeUsers.length > 0 ? officeUsers : exactMatchResponse.value, campusInfo.name, graphClient);
+          log(`Found ${members.length} users with exact department match`);
         } else {
-          log(`No users found with partial department name and office match`);
+          log(`No users found with exact department match: ${departmentName}`);
         }
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
-        log(`Error with partial match query: ${errorMessage}`);
+        log(`Error with exact match query: ${errorMessage}`);
       }
     }
     
-    // Strategy 4: Last resort - just try to find users in this office with any department
-    if (members.length === 0) {
-      log(`No users found with department filters. Looking for any users in office: ${campusInfo.officeFilter}`);
+    // Return department members from M365
+    if (members.length > 0) {
+      return res.json({
+        success: true,
+        members: members,
+        count: members.length,
+        departmentName: departmentName,
+        campus: campusInfo.name
+      });
+    } else {
+      // Last resort - if we couldn't find any users, return an empty array with a helpful message
+      log("No members found using any search strategy");
       
-      try {
-        const officeFilter = `officeLocation eq '${campusInfo.officeFilter}' or contains(officeLocation, '${campusInfo.officeFilter}')`;
-        
-        const officeOnlyResponse = await graphClient
-          .api('/users')
-          .filter(officeFilter)
-          .select('displayName,mail,businessPhones,mobilePhone,jobTitle,officeLocation,department')
-          .get();
-        
-        if (officeOnlyResponse.value && officeOnlyResponse.value.length > 0) {
-          // Sort users with departments similar to what we're looking for to the top
-          const sortedUsers = officeOnlyResponse.value.sort((a: any, b: any) => {
-            const aDept = (a.department || '').toLowerCase();
-            const bDept = (b.department || '').toLowerCase();
-            const targetDept = departmentName.toLowerCase();
-            
-            // If one has the target department and the other doesn't
-            if (aDept.includes(targetDept) && !bDept.includes(targetDept)) return -1;
-            if (!aDept.includes(targetDept) && bDept.includes(targetDept)) return 1;
-            
-            // Alphabetically by department otherwise
-            return aDept.localeCompare(bDept);
-          });
-          
-          members = await mapGraphUsersToMembers(sortedUsers, campusInfo.name, graphClient);
-          log(`Found ${members.length} users in the office location`);
-        } else {
-          log(`No users found in office location: ${campusInfo.officeFilter}`);
-        }
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        log(`Error with office-only query: ${errorMessage}`);
-      }
+      return res.json({
+        success: true,
+        members: [],
+        count: 0,
+        departmentName: departmentName,
+        campus: campusInfo.name,
+        message: `No users found for ${departmentName} in ${campusInfo.name}`
+      });
     }
-    
-    // Return only the department members from M365
-    return res.json({
-      success: true,
-      members: members,
-      count: members.length,
-      departmentName: departmentName,
-      campus: campusInfo.name
-    });
     
   } catch (err) {
     // Log and return any unexpected errors
@@ -299,7 +259,6 @@ async function mapGraphUsersToMembers(graphUsers: any[], defaultOffice: string, 
         // Get the photo as a data URL
         const photoResponse = await graphClient
           .api(`/users/${members[i].email}/photo/$value`)
-          .header('Content-Type', 'image/jpeg')
           .get();
         
         if (photoResponse) {
