@@ -27,7 +27,7 @@ interface CampusMapping {
 export default async ({ req, res, log, error }: Context) => {
   try {
     // Get campus and optional departmentId from request body
-    const { campus, departmentId } = req.body;
+    const { campus, departmentId } = JSON.parse(req.body);
     
     // Validate campus parameter
     if (!campus) {
