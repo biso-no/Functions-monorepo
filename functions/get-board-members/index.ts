@@ -315,20 +315,31 @@ async function addProfilePhotos(members: DepartmentMember[], graphClient: any, l
   for (let i = 0; i < members.length; i++) {
     if (members[i].email) {
       try {
-        // Fetch photo
-        const photoResponse = await graphClient
-          .api(`/users/${members[i].email}/photo/$value`)
+        // First check if user has a photo
+        const photoMetadata = await graphClient
+          .api(`/users/${members[i].email}/photo`)
           .get();
-        
-        if (photoResponse) {
-          // Convert the binary data to a Base64 string
-          const base64Photo = Buffer.from(photoResponse).toString('base64');
-          members[i].profilePhotoUrl = `data:image/jpeg;base64,${base64Photo}`;
-          log(`Successfully fetched photo for ${members[i].name}`);
+
+        if (photoMetadata) {
+          // If photo exists, get the binary content
+          const photoResponse = await graphClient
+            .api(`/users/${members[i].email}/photo/$value`)
+            .responseType('arraybuffer')  // Specify that we want binary data
+            .get();
+
+          if (photoResponse) {
+            // Convert the binary data to a Base64 string
+            const base64Photo = Buffer.from(photoResponse).toString('base64');
+            members[i].profilePhotoUrl = `data:image/jpeg;base64,${base64Photo}`;
+            log(`Successfully fetched photo for ${members[i].name}`);
+          }
+        } else {
+          log(`No photo available for user: ${members[i].email}`);
         }
       } catch (err) {
         // Just skip this photo and continue
-        log(`No photo available for user: ${members[i].email}`);
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        log(`Error fetching photo for ${members[i].email}: ${errorMessage}`);
       }
     }
   }
