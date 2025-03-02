@@ -2,9 +2,5 @@
   "name": "@biso/create-document-embedding",
   "version": "0.0.1",
   "module": "index.ts",
-  "type": "module",
-  "dependencies": {
-    "@biso/ai": "0.0.1",
-    "@biso/appwrite": "0.0.1"
-  }
+  "type": "module"
 }
