@@ -26,6 +26,7 @@ export async function initVectorStore() {
   }
 }
 
+
 /**
  * Get the vector store instance
  */
