@@ -69,7 +69,7 @@ export default async ({ req, res, log, error }: Context) => {
       // Department ID provided - look it up in the database
       try {
         const department = await databases.getDocument('app', 'departments', departmentId);
-        departmentName = department.name || "";
+        departmentName = department.Name || "";
         
         if (!departmentName) {
           log(`Warning: Department found but has no name. Using ID as fallback.`);

@@ -25,7 +25,7 @@ export async function fetchFileFromAppwrite(bucketId: string, fileId: string): P
     console.error('Error fetching file from Appwrite:', error);
     throw error;
   }
-}
+} 
 
 // Main function to be triggered by Appwrite
 export default async function appwriteFunction(req: any, res: any) {
