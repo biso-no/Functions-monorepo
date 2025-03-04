@@ -6,7 +6,6 @@
     "dependencies": {
       "bun-types": "latest",
       "zod": "1",
-      "@biso/utils": "0.0.1",
       "@biso/vipps": "0.0.1",
       "@biso/appwrite": "0.0.1"
     }

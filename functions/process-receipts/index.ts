@@ -1,4 +1,3 @@
-import { Client, Databases, Storage } from 'node-appwrite';
 import OpenAI from 'openai';
 import { ExchangeRateResponse } from '@biso/types';
 import { Context } from '@biso/types';

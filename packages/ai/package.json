@@ -3,10 +3,6 @@
   "version": "0.0.1",
   "module": "index.ts",
   "type": "module",
-  "resolutions": {
-    "canvas": "2.11.2",
-    "sharp": "0.32.6"
-  },
   "dependencies": {
     "@ai-sdk/openai": "^1.1.15",
     "@biso/appwrite": "0.0.1",

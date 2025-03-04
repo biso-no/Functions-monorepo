@@ -1,4 +1,4 @@
-import { getCheckout, getPayment, getAccessToken } from "../../packages/vipps/src/index.js";
+import { getCheckout, getPayment, getAccessToken } from "@biso/vipps";
 import { createAdminClient, Query } from "@biso/appwrite";
 import { CryptoHasher } from "bun";
 
