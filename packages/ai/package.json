@@ -9,7 +9,6 @@
     "@mastra/rag": "^0.1.7",
     "@types/pdf-parse": "^1.1.4",
     "ai": "^4.1.47",
-    "pdf-parse": "^1.1.1",
-    "node-appwrite": "^11.1.0"
+    "pdf-parse": "^1.1.1"
   }
 }

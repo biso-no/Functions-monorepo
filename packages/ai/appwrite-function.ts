@@ -1,23 +1,11 @@
-import { Client, Storage } from 'node-appwrite';
 import { handleDocumentUpload } from './document-embedder.js';
 import { initVectorStore } from './index.js';
-
-// Initialize Appwrite client
-function getAppwriteClient(): { client: Client, storage: Storage } {
-  const client = new Client()
-    .setEndpoint(process.env.APPWRITE_ENDPOINT || '')
-    .setProject(process.env.APPWRITE_PROJECT_ID || '')
-    .setKey(process.env.APPWRITE_API_KEY || '');
-
-  const storage = new Storage(client);
-  
-  return { client, storage };
-}
+import { createAdminClient } from '@biso/appwrite';
 
 // Update the fetchFileFromAppwrite function
 export async function fetchFileFromAppwrite(bucketId: string, fileId: string): Promise<Buffer> {
   try {
-    const { storage } = getAppwriteClient();
+    const { storage } = await createAdminClient();
     const fileResponse = await storage.getFileDownload(bucketId, fileId);
     // fileResponse is already a Buffer, so return it directly
     return fileResponse;
