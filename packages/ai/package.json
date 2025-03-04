@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "module": "index.ts",
   "type": "module",
+  "resolutions": {
+    "sharp": "0.33.5"
+  },
   "dependencies": {
     "@ai-sdk/openai": "^1.1.15",
     "@biso/appwrite": "0.0.1",
