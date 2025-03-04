@@ -1,5 +1,4 @@
-// Import environment variables (assuming you have dotenv or similar)
-import './environment.js';
+
 
 // Import Mastra components
 import { PgVector } from "@mastra/pg";
