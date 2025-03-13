@@ -30,8 +30,8 @@ export default async ({ req, res, log, error }: Context) => {
         // Fetch specific product from WooCommerce API
         const response = await axios.get(`https://biso.no/wp-json/wc/v3/products/${productId}`, {
             params: {
-                consumer_key: process.env.WC_CONSUMER_KEY,
-                consumer_secret: process.env.WC_CONSUMER_SECRET,
+                consumer_key: process.env.WOOC_CONSUMER_KEY,
+                consumer_secret: process.env.WOOC_CONSUMER_SECRET,
             },
         });
 
