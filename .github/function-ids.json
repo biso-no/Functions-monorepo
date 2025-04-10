@@ -1,0 +1,22 @@
+{
+    "24s0-get-departments": "get_departments",
+    "24so-approval-flow": "submit_expense_to_24",
+    "24so-create-order": "handle_24so_membership",
+    "create-chat-group": null,
+    "create-event": "request_event_approval",
+    "create-membership-from-shop": "membership_from_shop",
+    "create-post": "sync_posts_from_wp",
+    "create-user-doc": "create_user_doc",
+    "election-vote": null,
+    "extract-pdf": null,
+    "fetch-board-members": null,
+    "generate-expense-description": "generate_expense_description",
+    "get-board-members": "get_board_members",
+    "get-instagram-posts-by-hashtag": "get_feed_by_hashtag",
+    "process-receipts": "process_receipts",
+    "sync-webshop": "sync_webshop_products",
+    "verify-biso-membership": "verify_biso_membership",
+    "vipps-callback": "vipps_callback",
+    "vipps-payment": "vipps_checkout",
+    "webshop-product": "webshop_product"
+  }

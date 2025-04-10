@@ -1,0 +1,113 @@
+name: Deploy Updated Appwrite Functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/**'
+      - 'packages/**'
+      - '.github/workflows/deploy-functions.yml'
+      - '.github/function-ids.json'
+
+jobs:
+  detect-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for proper diff detection
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install Appwrite CLI and jq
+        run: |
+          npm install -g appwrite-cli
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Login to Appwrite
+        run: |
+          echo 'yes' | appwrite client --endpoint "${{ secrets.APPWRITE_ENDPOINT }}" --projectId "${{ secrets.APPWRITE_PROJECT_ID }}" --key "${{ secrets.APPWRITE_API_KEY }}"
+      
+      - name: Get changed functions
+        id: changed-functions
+        run: |
+          # Get the list of changed files
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          
+          # Initialize empty array for functions to deploy
+          FUNCTIONS_TO_DEPLOY=()
+          
+          # Check each function directory for changes
+          for FUNCTION_DIR in functions/*; do
+            if [ -d "$FUNCTION_DIR" ]; then
+              FUNCTION_NAME=$(basename "$FUNCTION_DIR")
+              
+              # Check if any files in this function directory have changed
+              if echo "$CHANGED_FILES" | grep -q "^functions/$FUNCTION_NAME/"; then
+                FUNCTIONS_TO_DEPLOY+=("$FUNCTION_NAME")
+                echo "Function $FUNCTION_NAME has changes"
+              else
+                # Check if any package this function depends on has changed
+                # Get the dependencies from package.json
+                if [ -f "$FUNCTION_DIR/package.json" ]; then
+                  DEPS=$(cat "$FUNCTION_DIR/package.json" | grep -o '"@biso/[^"]*"' | tr -d '"')
+                  for DEP in $DEPS; do
+                    DEP_PATH=$(echo $DEP | sed 's/@biso\///')
+                    if echo "$CHANGED_FILES" | grep -q "^packages/$DEP_PATH/"; then
+                      FUNCTIONS_TO_DEPLOY+=("$FUNCTION_NAME")
+                      echo "Function $FUNCTION_NAME affected by changes in dependency $DEP"
+                      break
+                    fi
+                  done
+                fi
+              fi
+            fi
+          done
+          
+          # Remove duplicates
+          FUNCTIONS_TO_DEPLOY=($(echo "${FUNCTIONS_TO_DEPLOY[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+          
+          # Output the list of functions to deploy
+          echo "FUNCTIONS_TO_DEPLOY=${FUNCTIONS_TO_DEPLOY[*]}" >> $GITHUB_OUTPUT
+          echo "Functions to deploy: ${FUNCTIONS_TO_DEPLOY[*]}"
+      
+      - name: Deploy changed functions
+        run: |
+          IFS=' ' read -ra FUNCTIONS <<< "${{ steps.changed-functions.outputs.FUNCTIONS_TO_DEPLOY }}"
+          
+          if [ ${#FUNCTIONS[@]} -eq 0 ]; then
+            echo "No functions to deploy."
+            exit 0
+          fi
+          
+          for FUNCTION in "${FUNCTIONS[@]}"; do
+            echo "Checking function: $FUNCTION"
+            
+            # Get function ID from mapping file
+            FUNCTION_ID=$(jq -r ".\"$FUNCTION\"" .github/function-ids.json)
+            
+            if [ "$FUNCTION_ID" == "null" ]; then
+              echo "Warning: No function ID mapping found for $FUNCTION. Skipping deployment."
+              continue
+            fi
+            
+            echo "Deploying function: $FUNCTION with ID: $FUNCTION_ID"
+            
+            cd "functions/$FUNCTION"
+            
+            # Deploy the function
+            appwrite functions createDeployment \
+              --functionId="$FUNCTION_ID" \
+              --entrypoint="index.ts" \
+              --code="." \
+              --activate=true
+            
+            cd ../../
+            
+            echo "Function $FUNCTION deployed successfully"
+          done
