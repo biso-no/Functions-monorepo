@@ -1,4 +1,4 @@
-import { Client, Databases, Users, Account, Storage, Functions, Teams } from "node-appwrite";
+import { Client, Databases, Users, Account, Storage, Functions, Teams, Messaging } from "node-appwrite";
 import zod from "zod";
 
 // Function to create a session client using JWT from headers
@@ -53,6 +53,12 @@ export async function createAdminClient() {
         },
         get functions() {
             return new Functions(client);
+        },
+        get messaging(){
+            return new Messaging(client)
+        },
+        get teams() {
+            return new Teams(client);
         }
     };
 }
